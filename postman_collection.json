@@ -1,0 +1,852 @@
+{
+  "info": {
+    "name": "AIC Attendance API - 26828",
+    "description": "AUCA Innovation Center Student Attendance System. Assignment 4 - Ishimwe Mireille (26828).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Students",
+      "item": [
+        {
+          "name": "Get all students",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/students",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "students"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Get student by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/students/PASTE-STUDENT-ID",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "students",
+                "PASTE-STUDENT-ID"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Register student",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/students",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "students"
+              ]
+            },
+            "description": "Returns 201 with the new UUID.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"regNumber\": \"26828\",\n  \"firstName\": \"Mireille\",\n  \"lastName\": \"Ishimwe\",\n  \"email\": \"mireille.26828@auca.ac.rw\",\n  \"phone\": \"0788123456\",\n  \"gender\": \"Female\",\n  \"program\": \"Software Engineering\",\n  \"yearOfStudy\": 3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Update student",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/students/PASTE-STUDENT-ID",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "students",
+                "PASTE-STUDENT-ID"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"regNumber\": \"26828\",\n  \"firstName\": \"Mireille\",\n  \"lastName\": \"Ishimwe\",\n  \"email\": \"mireille.26828@auca.ac.rw\",\n  \"phone\": \"0788123456\",\n  \"gender\": \"Female\",\n  \"program\": \"Software Engineering\",\n  \"yearOfStudy\": 4\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Delete student",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/students/PASTE-STUDENT-ID",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "students",
+                "PASTE-STUDENT-ID"
+              ]
+            },
+            "description": "Returns 204."
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Sessions",
+      "item": [
+        {
+          "name": "Get all sessions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/sessions",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "sessions"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Get session by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/sessions/PASTE-SESSION-ID",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "sessions",
+                "PASTE-SESSION-ID"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Create session",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/sessions",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "sessions"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Spring Boot REST Workshop\",\n  \"sessionDate\": \"2026-09-17\",\n  \"startTime\": \"08:00\",\n  \"endTime\": \"11:00\",\n  \"room\": \"LAB-1\",\n  \"trainer\": \"Tuyisenge Jeremie\",\n  \"capacity\": 30\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Update session",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/sessions/PASTE-SESSION-ID",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "sessions",
+                "PASTE-SESSION-ID"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Spring Boot REST Workshop\",\n  \"sessionDate\": \"2026-09-17\",\n  \"startTime\": \"08:00\",\n  \"endTime\": \"11:00\",\n  \"room\": \"LAB-1\",\n  \"trainer\": \"Tuyisenge Jeremie\",\n  \"capacity\": 40\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Delete session",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/sessions/PASTE-SESSION-ID",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "sessions",
+                "PASTE-SESSION-ID"
+              ]
+            },
+            "description": ""
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Attendances",
+      "item": [
+        {
+          "name": "Get all attendances",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/attendances",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "attendances"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Get attendance by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/attendances/PASTE-ATTENDANCE-ID",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "attendances",
+                "PASTE-ATTENDANCE-ID"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Get register of a session",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/attendances/session/PASTE-SESSION-ID",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "attendances",
+                "session",
+                "PASTE-SESSION-ID"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Get history of a student",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/attendances/student/PASTE-STUDENT-ID",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "attendances",
+                "student",
+                "PASTE-STUDENT-ID"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Mark attendance",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/attendances",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "attendances"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"studentId\": \"PASTE-STUDENT-ID\",\n  \"sessionId\": \"PASTE-SESSION-ID\",\n  \"timeIn\": \"07:55\",\n  \"status\": \"PRESENT\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Update attendance",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/attendances/PASTE-ATTENDANCE-ID",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "attendances",
+                "PASTE-ATTENDANCE-ID"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"studentId\": \"PASTE-STUDENT-ID\",\n  \"sessionId\": \"PASTE-SESSION-ID\",\n  \"timeIn\": \"08:30\",\n  \"status\": \"LATE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Delete attendance",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/attendances/PASTE-ATTENDANCE-ID",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "attendances",
+                "PASTE-ATTENDANCE-ID"
+              ]
+            },
+            "description": ""
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Business rules (expected to fail)",
+      "item": [
+        {
+          "name": "400 - invalid student fields",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/students",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "students"
+              ]
+            },
+            "description": "Every field is wrong. Returns 400 with a message per field.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"regNumber\": \"ABC\",\n  \"firstName\": \"A\",\n  \"lastName\": \"B\",\n  \"email\": \"bad\",\n  \"phone\": \"123\",\n  \"gender\": \"Other\",\n  \"program\": \"X\",\n  \"yearOfStudy\": 9\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "409 - email is not an AUCA email",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/students",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "students"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"regNumber\": \"25104\",\n  \"firstName\": \"Mireille\",\n  \"lastName\": \"Ishimwe\",\n  \"email\": \"eric@gmail.com\",\n  \"phone\": \"0788123456\",\n  \"gender\": \"Female\",\n  \"program\": \"Software Engineering\",\n  \"yearOfStudy\": 3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "409 - duplicate registration number",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/students",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "students"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"regNumber\": \"26828\",\n  \"firstName\": \"Mireille\",\n  \"lastName\": \"Ishimwe\",\n  \"email\": \"someone.else@auca.ac.rw\",\n  \"phone\": \"0788123456\",\n  \"gender\": \"Female\",\n  \"program\": \"Software Engineering\",\n  \"yearOfStudy\": 3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "409 - first name equals last name",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/students",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "students"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"regNumber\": \"27310\",\n  \"firstName\": \"Peter\",\n  \"lastName\": \"Peter\",\n  \"email\": \"peter.27310@auca.ac.rw\",\n  \"phone\": \"0788123456\",\n  \"gender\": \"Female\",\n  \"program\": \"Software Engineering\",\n  \"yearOfStudy\": 3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "409 - session end before start",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/sessions",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "sessions"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Spring Boot REST Workshop\",\n  \"sessionDate\": \"2026-09-17\",\n  \"startTime\": \"14:00\",\n  \"endTime\": \"09:00\",\n  \"room\": \"LAB-9\",\n  \"trainer\": \"Tuyisenge Jeremie\",\n  \"capacity\": 30\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "409 - room already booked",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/sessions",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "sessions"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Spring Boot REST Workshop\",\n  \"sessionDate\": \"2026-09-17\",\n  \"startTime\": \"08:00\",\n  \"endTime\": \"11:00\",\n  \"room\": \"LAB-1\",\n  \"trainer\": \"Tuyisenge Jeremie\",\n  \"capacity\": 30\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "409 - student already marked for this session",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/attendances",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "attendances"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"studentId\": \"PASTE-STUDENT-ID\",\n  \"sessionId\": \"PASTE-SESSION-ID\",\n  \"timeIn\": \"07:55\",\n  \"status\": \"PRESENT\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "409 - PRESENT but arrived after the start",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/attendances",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "attendances"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"studentId\": \"PASTE-OTHER-STUDENT-ID\",\n  \"sessionId\": \"PASTE-SESSION-ID\",\n  \"timeIn\": \"09:00\",\n  \"status\": \"PRESENT\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "409 - LATE but arrived before the start",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/attendances",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "attendances"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"studentId\": \"PASTE-OTHER-STUDENT-ID\",\n  \"sessionId\": \"PASTE-SESSION-ID\",\n  \"timeIn\": \"07:30\",\n  \"status\": \"LATE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "409 - ABSENT without a reason",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/attendances",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "attendances"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"studentId\": \"PASTE-OTHER-STUDENT-ID\",\n  \"sessionId\": \"PASTE-SESSION-ID\",\n  \"status\": \"ABSENT\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "409 - attendance for a future session",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/attendances",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "attendances"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"studentId\": \"PASTE-STUDENT-ID\",\n  \"sessionId\": \"PASTE-FUTURE-SESSION-ID\",\n  \"timeIn\": \"07:55\",\n  \"status\": \"PRESENT\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "409 - delete a student who has attendance",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/students/PASTE-STUDENT-ID",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "students",
+                "PASTE-STUDENT-ID"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "404 - student that does not exist",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/students/00000000-0000-0000-0000-000000000000",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "students",
+                "00000000-0000-0000-0000-000000000000"
+              ]
+            },
+            "description": ""
+          }
+        }
+      ]
+    }
+  ]
+}
