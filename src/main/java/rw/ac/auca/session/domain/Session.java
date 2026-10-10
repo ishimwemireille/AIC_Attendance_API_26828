@@ -3,6 +3,9 @@ package rw.ac.auca.session.domain;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.Min;
@@ -13,6 +16,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Check;
 import rw.ac.auca.base.BaseEntity;
+import rw.ac.auca.user.domain.User;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -57,10 +61,10 @@ public class Session extends BaseEntity {
     @Column(name = "room", nullable = false, length = 20)
     private String room;
 
-    @NotBlank(message = "Trainer is required")
-    @Size(min = 3, max = 60, message = "Trainer must be between 3 and 60 characters")
-    @Column(name = "trainer", nullable = false, length = 60)
-    private String trainer;
+    @NotNull(message = "Trainer is required")
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "trainer_id", nullable = false)
+    private User trainer;
 
     @Min(value = 1, message = "Capacity must be at least 1")
     @Column(name = "capacity", nullable = false)

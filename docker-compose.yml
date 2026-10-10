@@ -1,0 +1,27 @@
+# Infrastructure for the AIC Attendance System.
+# PostgreSQL runs natively on this machine, so only the two new services are here.
+#   docker compose up -d
+services:
+
+  mongo:
+    image: mongo:8
+    container_name: aic-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    container_name: aic-rabbitmq
+    restart: unless-stopped
+    ports:
+      - "5672:5672"     # AMQP, used by the application
+      - "15672:15672"   # management UI, http://localhost:15672 (guest / guest)
+    volumes:
+      - rabbit-data:/var/lib/rabbitmq
+
+volumes:
+  mongo-data:
+  rabbit-data:
