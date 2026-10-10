@@ -1,6 +1,7 @@
 package rw.ac.auca.user.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import rw.ac.auca.exception.BusinessRuleException;
@@ -27,8 +28,23 @@ import java.util.stream.Collectors;
 @Transactional
 public class UserServiceImpl implements UserService {
 
-    /** Only an AUCA account may be given access to the system. */
-    public static final String ALLOWED_DOMAIN = "@auca.ac.rw";
+    /**
+     * Only an account in this domain may be given access. It is a property so a
+     * demonstration can run against a personal Google account when the AUCA
+     * address is not itself a Google identity. Set app.allowed-domain to an
+     * empty value to accept any address.
+     */
+    @Value("${app.allowed-domain:@auca.ac.rw}")
+    private String allowedDomain;
+
+    public String getAllowedDomain() {
+        return allowedDomain;
+    }
+
+    private boolean domainAccepted(String address) {
+        return allowedDomain == null || allowedDomain.isBlank()
+                || address.endsWith(allowedDomain.toLowerCase());
+    }
 
     @Autowired
     private UserRepository userRepository;
@@ -40,8 +56,8 @@ public class UserServiceImpl implements UserService {
     public User createUser(String email, String fullName, Set<RoleName> roleNames) {
         String address = email == null ? "" : email.trim().toLowerCase();
 
-        if (!address.endsWith(ALLOWED_DOMAIN)) {
-            throw new BusinessRuleException("Only an " + ALLOWED_DOMAIN
+        if (!domainAccepted(address)) {
+            throw new BusinessRuleException("Only an " + allowedDomain
                     + " address can be given access to the system.");
         }
         if (userRepository.existsByEmailIgnoreCase(address)) {

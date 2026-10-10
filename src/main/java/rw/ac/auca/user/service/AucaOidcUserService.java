@@ -30,14 +30,19 @@ public class AucaOidcUserService extends OidcUserService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private UserServiceImpl userService;
+
     @Override
     public OidcUser loadUser(OidcUserRequest userRequest) throws OAuth2AuthenticationException {
         OidcUser googleUser = super.loadUser(userRequest);
         String email = googleUser.getEmail() == null ? "" : googleUser.getEmail().toLowerCase();
 
-        if (!email.endsWith(UserServiceImpl.ALLOWED_DOMAIN)) {
+        String allowedDomain = userService.getAllowedDomain();
+        if (allowedDomain != null && !allowedDomain.isBlank()
+                && !email.endsWith(allowedDomain.toLowerCase())) {
             throw new OAuth2AuthenticationException(new OAuth2Error("invalid_domain"),
-                    "Only an " + UserServiceImpl.ALLOWED_DOMAIN + " account may sign in.");
+                    "Only an " + allowedDomain + " account may sign in.");
         }
 
         User user = userRepository.findByEmailIgnoreCase(email)
