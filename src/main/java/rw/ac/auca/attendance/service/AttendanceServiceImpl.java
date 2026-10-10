@@ -8,6 +8,7 @@ import rw.ac.auca.attendance.domain.Attendance;
 import rw.ac.auca.attendance.domain.AttendanceStatus;
 import rw.ac.auca.attendance.repository.AttendanceRepository;
 import rw.ac.auca.exception.BusinessRuleException;
+import rw.ac.auca.notification.service.AttendanceEventPublisher;
 import rw.ac.auca.exception.ResourceNotFoundException;
 import rw.ac.auca.session.domain.Session;
 import rw.ac.auca.session.service.SessionService;
@@ -34,6 +35,9 @@ public class AttendanceServiceImpl implements AttendanceService {
 
     @Autowired
     private AuditService auditService;
+
+    @Autowired
+    private AttendanceEventPublisher eventPublisher;
 
     @Autowired
     private StudentService studentService;
@@ -65,6 +69,7 @@ public class AttendanceServiceImpl implements AttendanceService {
         apply(attendance, student, session, request);
         Attendance saved = attendanceRepository.save(attendance);
         auditService.record("Attendance", saved.getId(), AuditService.CREATE, null, saved);
+        eventPublisher.publishIfAbsent(saved);
         return saved;
     }
 
@@ -84,6 +89,7 @@ public class AttendanceServiceImpl implements AttendanceService {
         apply(found, student, session, request);
         Attendance saved = attendanceRepository.save(found);
         auditService.record("Attendance", saved.getId(), AuditService.UPDATE, null, saved);
+        eventPublisher.publishIfAbsent(saved);
         return saved;
     }
 
