@@ -63,6 +63,13 @@ public class UserController {
         return userService.findAllUsers();
     }
 
+    /** Needed to populate the trainer field when scheduling a session. */
+    @GetMapping("/trainers")
+    @PreAuthorize("hasAnyRole('ADMIN', 'COHORT_LEADER')")
+    public List<User> findTrainers() {
+        return userService.findTrainers();
+    }
+
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public User findUserById(@PathVariable UUID id) {

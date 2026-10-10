@@ -8,7 +8,7 @@ export default defineConfig({
     proxy: {
       // The API runs separately; this keeps the browser on one origin in development.
       '/api': {
-        target: process.env.VITE_API_TARGET || 'http://localhost:8090',
+        target: process.env.VITE_API_TARGET || 'http://localhost:8080',
         changeOrigin: true,
       },
     },

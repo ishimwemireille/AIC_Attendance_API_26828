@@ -8,6 +8,8 @@ import Students from './pages/Students'
 import Sessions from './pages/Sessions'
 import MarkAttendance from './pages/MarkAttendance'
 import Notifications from './pages/Notifications'
+import Reports from './pages/Reports'
+import Users from './pages/Users'
 
 export default function App() {
   const [user, setUser] = useState(null)
@@ -49,6 +51,8 @@ export default function App() {
         <Route path="/sessions" element={<Sessions user={user} />} />
         <Route path="/mark" element={<MarkAttendance user={user} />} />
         <Route path="/notifications" element={<Notifications />} />
+        <Route path="/reports" element={<Reports />} />
+        <Route path="/users" element={<Users />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Layout>

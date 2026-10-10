@@ -129,4 +129,17 @@ public class UserServiceImpl implements UserService {
     public List<User> findAllUsers() {
         return userRepository.findAllByOrderByFullNameAsc();
     }
+
+    /**
+     * A cohort leader schedules sessions but may not manage users, so they need
+     * the trainers without being able to read the whole user list.
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public List<User> findTrainers() {
+        return userRepository.findAllByOrderByFullNameAsc().stream()
+                .filter(User::isActive)
+                .filter(user -> user.hasRole(RoleName.TRAINER))
+                .toList();
+    }
 }

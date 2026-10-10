@@ -11,6 +11,7 @@ export default function Students({ user }) {
   const [query, setQuery] = useState('')
   const [form, setForm] = useState(BLANK)
   const [showForm, setShowForm] = useState(false)
+  const [editing, setEditing] = useState(null)
   const [error, setError] = useState(null)
   const [busy, setBusy] = useState(false)
 
@@ -25,8 +26,10 @@ export default function Students({ user }) {
     event.preventDefault()
     setBusy(true); setError(null)
     try {
-      await api.createStudent({ ...form, yearOfStudy: Number(form.yearOfStudy) })
-      setForm(BLANK); setShowForm(false); load()
+      const body = { ...form, yearOfStudy: Number(form.yearOfStudy) }
+      if (editing) await api.updateStudent(editing, body)
+      else await api.createStudent(body)
+      setForm(BLANK); setEditing(null); setShowForm(false); load()
     } catch (problem) {
       setError(problem.message)
     } finally {
@@ -37,6 +40,16 @@ export default function Students({ user }) {
   async function remove(student) {
     if (!window.confirm(`Remove ${student.firstName} ${student.lastName}?`)) return
     try { await api.deleteStudent(student.id); load() } catch (p) { setError(p.message) }
+  }
+
+  function startEdit(student) {
+    setEditing(student.id)
+    setForm({
+      regNumber: student.regNumber, firstName: student.firstName, lastName: student.lastName,
+      email: student.email, phone: student.phone, gender: student.gender,
+      program: student.program, yearOfStudy: student.yearOfStudy,
+    })
+    setShowForm(true); setError(null)
   }
 
   const shown = (students || []).filter((s) => {
@@ -52,7 +65,10 @@ export default function Students({ user }) {
           <p>{students ? `${students.filter((s) => s.active).length} active of ${students.length}` : 'Loading…'}</p>
         </div>
         {canWrite && (
-          <button className="btn" onClick={() => setShowForm((v) => !v)}>
+          <button className="btn" onClick={() => {
+            if (showForm) { setShowForm(false); return }
+            setEditing(null); setForm(BLANK); setShowForm(true); setError(null)
+          }}>
             {showForm ? 'Close' : 'Add student'}
           </button>
         )}
@@ -63,7 +79,9 @@ export default function Students({ user }) {
 
         {showForm && canWrite && (
           <form className="card" onSubmit={save}>
-            <h2 style={{ fontSize: 18, marginBottom: 14 }}>New student</h2>
+            <h2 style={{ fontSize: 18, marginBottom: 14 }}>
+              {editing ? 'Edit student' : 'New student'}
+            </h2>
             <div className="form-grid">
               <Field label="Registration number" value={form.regNumber} hint="Exactly 5 digits"
                      onChange={(v) => setForm({ ...form, regNumber: v })} />
@@ -100,7 +118,7 @@ export default function Students({ user }) {
               </div>
             </div>
             <button className="btn" type="submit" disabled={busy} style={{ marginTop: 16 }}>
-              {busy ? 'Saving…' : 'Save student'}
+              {busy ? 'Saving…' : editing ? 'Update student' : 'Save student'}
             </button>
           </form>
         )}
@@ -138,8 +156,12 @@ export default function Students({ user }) {
                       </td>
                       {canWrite && (
                         <td data-label="Actions">
-                          <button className="btn ghost" style={{ minHeight: 36, padding: '0 12px' }}
-                                  onClick={() => remove(s)}>Remove</button>
+                          <div style={{ display: 'flex', gap: 8 }}>
+                            <button className="btn ghost" style={{ minHeight: 36, padding: '0 12px' }}
+                                    onClick={() => startEdit(s)}>Edit</button>
+                            <button className="btn ghost" style={{ minHeight: 36, padding: '0 12px' }}
+                                    onClick={() => remove(s)}>Remove</button>
+                          </div>
                         </td>
                       )}
                     </tr>
