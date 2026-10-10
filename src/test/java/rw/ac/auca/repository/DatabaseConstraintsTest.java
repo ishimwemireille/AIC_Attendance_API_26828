@@ -39,6 +39,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * against the generated enum check, which PostgreSQL accepts.
  *
  * It does mean these tests need the server the application already requires.
+ * The connection details come from TEST_DB_URL, TEST_DB_USER and
+ * TEST_DB_PASSWORD so the same test runs on a laptop and in CI.
  *
  * @author Ishimwe Mireille
  * @version 1.0
@@ -46,7 +48,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @TestPropertySource(properties = {
-        "spring.datasource.url=jdbc:postgresql://localhost:5432/aicattendance_test",
+        "spring.datasource.url=${TEST_DB_URL:jdbc:postgresql://localhost:5432/aicattendance_test}",
+        "spring.datasource.username=${TEST_DB_USER:postgres}",
+        "spring.datasource.password=${TEST_DB_PASSWORD:1234}",
         "spring.jpa.hibernate.ddl-auto=create-drop"
 })
 class DatabaseConstraintsTest {

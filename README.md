@@ -188,7 +188,22 @@ which is recreated on every run. Create it once:
 createdb -h localhost -U postgres aicattendance_test
 ```
 
+Connection details come from `TEST_DB_URL`, `TEST_DB_USER` and `TEST_DB_PASSWORD`,
+defaulting to `localhost:5432`, `postgres` and `1234`. Override them if your
+local password differs:
+
+```bash
+TEST_DB_PASSWORD=yourpassword mvn test
+```
+
 They deliberately do not use an embedded database. A constraint is a property of
 the database engine, so checking it on a different one tests the wrong thing —
 H2 demonstrated exactly that by rejecting a value against a generated enum check
 that PostgreSQL accepts.
+
+## Continuous integration
+
+`.github/workflows/build.yml` runs on every push to `main` and on every pull
+request. Two jobs: the API with its full test suite against a real PostgreSQL
+service container, and the front end build. A badge for the result sits at the
+top of this file once the first run completes.
