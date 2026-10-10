@@ -1,6 +1,7 @@
 package rw.ac.auca.student.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import rw.ac.auca.audit.service.AuditService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import rw.ac.auca.attendance.repository.AttendanceRepository;
@@ -26,6 +27,9 @@ public class StudentServiceImpl implements StudentService {
     private StudentRepository studentRepository;
 
     @Autowired
+    private AuditService auditService;
+
+    @Autowired
     private AttendanceRepository attendanceRepository;
 
     @Override
@@ -39,11 +43,14 @@ public class StudentServiceImpl implements StudentService {
                     + theStudent.getEmail() + " is already used by another student.");
         }
         checkSharedRules(theStudent);
-        return studentRepository.save(theStudent);
+        Student saved = studentRepository.save(theStudent);
+        auditService.record("Student", saved.getId(), AuditService.CREATE, null, saved);
+        return saved;
     }
 
     @Override
     public Student updateStudent(UUID id, Student theStudent) {
+        Student before = snapshotOf(id);
         Student found = findStudentById(id);
 
         if (studentRepository.existsByRegNumberAndIdNot(theStudent.getRegNumber(), id)) {
@@ -65,7 +72,9 @@ public class StudentServiceImpl implements StudentService {
         found.setProgram(theStudent.getProgram());
         found.setYearOfStudy(theStudent.getYearOfStudy());
         found.setActive(theStudent.isActive());
-        return studentRepository.save(found);
+        Student saved = studentRepository.save(found);
+        auditService.record("Student", saved.getId(), AuditService.UPDATE, before, saved);
+        return saved;
     }
 
     private void checkSharedRules(Student theStudent) {
@@ -86,6 +95,7 @@ public class StudentServiceImpl implements StudentService {
                     + " because " + records + " attendance record(s) exist for this student. "
                     + "Deactivate the student instead.");
         }
+        auditService.record("Student", found.getId(), AuditService.DELETE, found, null);
         studentRepository.delete(found);
     }
 
@@ -100,5 +110,22 @@ public class StudentServiceImpl implements StudentService {
     @Transactional(readOnly = true)
     public List<Student> findAllStudents() {
         return studentRepository.findAll();
+    }
+
+    /** A detached copy of the row as it is now, for the audit trail. */
+    private Student snapshotOf(UUID id) {
+        Student current = findStudentById(id);
+        Student copy = new Student();
+        copy.setId(current.getId());
+        copy.setRegNumber(current.getRegNumber());
+        copy.setFirstName(current.getFirstName());
+        copy.setLastName(current.getLastName());
+        copy.setEmail(current.getEmail());
+        copy.setPhone(current.getPhone());
+        copy.setGender(current.getGender());
+        copy.setProgram(current.getProgram());
+        copy.setYearOfStudy(current.getYearOfStudy());
+        copy.setActive(current.isActive());
+        return copy;
     }
 }
