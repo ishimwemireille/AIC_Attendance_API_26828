@@ -6,6 +6,7 @@ import org.springframework.boot.persistence.autoconfigure.EntityScan;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * The Class AICAttendanceSystemApplication.
@@ -18,13 +19,15 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
  * @version 1.0
  */
 @SpringBootApplication
+@EnableScheduling
 @ComponentScan(basePackages = "rw.ac.auca.*")
 @EntityScan(basePackages = "rw.ac.auca.*")
 @EnableJpaRepositories(basePackages = {
         "rw.ac.auca.student.repository",
         "rw.ac.auca.session.repository",
         "rw.ac.auca.attendance.repository",
-        "rw.ac.auca.user.repository"
+        "rw.ac.auca.user.repository",
+        "rw.ac.auca.outbox.repository"
 })
 @EnableMongoRepositories(basePackages = {
         "rw.ac.auca.notification.repository",
