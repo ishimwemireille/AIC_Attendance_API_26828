@@ -1,6 +1,7 @@
 package rw.ac.auca.attendance.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import rw.ac.auca.audit.service.AuditService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import rw.ac.auca.attendance.domain.Attendance;
@@ -32,6 +33,9 @@ public class AttendanceServiceImpl implements AttendanceService {
     private AttendanceRepository attendanceRepository;
 
     @Autowired
+    private AuditService auditService;
+
+    @Autowired
     private StudentService studentService;
 
     @Autowired
@@ -59,7 +63,9 @@ public class AttendanceServiceImpl implements AttendanceService {
 
         Attendance attendance = new Attendance();
         apply(attendance, student, session, request);
-        return attendanceRepository.save(attendance);
+        Attendance saved = attendanceRepository.save(attendance);
+        auditService.record("Attendance", saved.getId(), AuditService.CREATE, null, saved);
+        return saved;
     }
 
     @Override
@@ -76,7 +82,9 @@ public class AttendanceServiceImpl implements AttendanceService {
         checkBusinessRules(student, session, request);
 
         apply(found, student, session, request);
-        return attendanceRepository.save(found);
+        Attendance saved = attendanceRepository.save(found);
+        auditService.record("Attendance", saved.getId(), AuditService.UPDATE, null, saved);
+        return saved;
     }
 
     private void checkBusinessRules(Student student, Session session, AttendanceRequest request) {
@@ -138,7 +146,9 @@ public class AttendanceServiceImpl implements AttendanceService {
 
     @Override
     public void deleteAttendance(UUID id) {
-        attendanceRepository.delete(findAttendanceById(id));
+        Attendance found = findAttendanceById(id);
+        auditService.record("Attendance", found.getId(), AuditService.DELETE, found, null);
+        attendanceRepository.delete(found);
     }
 
     @Override

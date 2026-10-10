@@ -2,6 +2,7 @@ package rw.ac.auca.session.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
+import rw.ac.auca.audit.service.AuditService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import rw.ac.auca.attendance.repository.AttendanceRepository;
@@ -31,6 +32,9 @@ public class SessionServiceImpl implements SessionService {
     private SessionRepository sessionRepository;
 
     @Autowired
+    private AuditService auditService;
+
+    @Autowired
     private AttendanceRepository attendanceRepository;
 
     @Autowired
@@ -50,7 +54,9 @@ public class SessionServiceImpl implements SessionService {
         }
         Session session = new Session();
         apply(session, request);
-        return sessionRepository.save(session);
+        Session saved = sessionRepository.save(session);
+        auditService.record("Session", saved.getId(), AuditService.CREATE, null, saved);
+        return saved;
     }
 
     @Override
@@ -73,7 +79,9 @@ public class SessionServiceImpl implements SessionService {
         }
 
         apply(found, request);
-        return sessionRepository.save(found);
+        Session saved = sessionRepository.save(found);
+        auditService.record("Session", saved.getId(), AuditService.UPDATE, null, saved);
+        return saved;
     }
 
     private void apply(Session session, SessionRequest request) {
@@ -110,6 +118,7 @@ public class SessionServiceImpl implements SessionService {
             throw new BusinessRuleException("Cannot delete this session because "
                     + marked + " attendance record(s) exist for it.");
         }
+        auditService.record("Session", found.getId(), AuditService.DELETE, found, null);
         sessionRepository.delete(found);
     }
 
