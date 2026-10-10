@@ -113,3 +113,55 @@ Hibernate creates the tables automatically on the first run.
 Import `postman_collection.json` from the root of this repository. It contains every
 endpoint and a folder of requests that deliberately break each business rule so the
 error responses can be demonstrated.
+
+## Running the whole system
+
+Three pieces: PostgreSQL (installed locally), MongoDB and RabbitMQ (containers),
+the Spring Boot API, and the React front end.
+
+```bash
+# 1. the two brokers / stores that are not installed natively
+docker compose up -d          # MongoDB on 27017, RabbitMQ on 5672 (UI on 15672)
+
+# 2. the API
+mvn spring-boot:run           # http://localhost:8080
+
+# 3. the front end, in a second terminal
+cd frontend
+npm install
+npm run dev                   # http://localhost:5173
+```
+
+The front end proxies `/api` to the API, so the browser stays on one origin.
+Point it somewhere else with `VITE_API_TARGET=http://localhost:9000 npm run dev`.
+
+### Signing in
+
+The usual way in is **Continue with your AUCA Google account**, which needs
+Google credentials:
+
+```bash
+export GOOGLE_CLIENT_ID=...
+export GOOGLE_CLIENT_SECRET=...
+mvn spring-boot:run -Dspring-boot.run.profiles=dev,google
+```
+
+Google cannot redirect back to a laptop that is not publicly reachable, so the
+`dev` profile also accepts HTTP Basic with the email and the single shared
+password in `app.dev.password`. That path is development only — no per-user
+password is stored by the system in either case.
+
+Seeded accounts (`app.seed-demo-data=true`):
+
+| Email | Role |
+|---|---|
+| `admin@auca.ac.rw` | ADMIN |
+| `cohort.leader@auca.ac.rw` | COHORT_LEADER |
+| `trainer.web@auca.ac.rw` | TRAINER |
+| `trainer.db@auca.ac.rw` | TRAINER |
+
+### A note for anyone on Spring Boot 4
+
+The MongoDB property prefix changed from `spring.data.mongodb` to
+`spring.mongodb`. The old name is ignored silently, so writes land in Mongo's
+default `test` database instead of failing.

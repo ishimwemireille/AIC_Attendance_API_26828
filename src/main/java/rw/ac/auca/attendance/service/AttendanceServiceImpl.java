@@ -1,12 +1,14 @@
 package rw.ac.auca.attendance.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import rw.ac.auca.audit.service.AuditService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import rw.ac.auca.attendance.domain.Attendance;
 import rw.ac.auca.attendance.domain.AttendanceStatus;
 import rw.ac.auca.attendance.repository.AttendanceRepository;
 import rw.ac.auca.exception.BusinessRuleException;
+import rw.ac.auca.notification.service.AttendanceEventPublisher;
 import rw.ac.auca.exception.ResourceNotFoundException;
 import rw.ac.auca.session.domain.Session;
 import rw.ac.auca.session.service.SessionService;
@@ -30,6 +32,12 @@ public class AttendanceServiceImpl implements AttendanceService {
 
     @Autowired
     private AttendanceRepository attendanceRepository;
+
+    @Autowired
+    private AuditService auditService;
+
+    @Autowired
+    private AttendanceEventPublisher eventPublisher;
 
     @Autowired
     private StudentService studentService;
@@ -59,7 +67,10 @@ public class AttendanceServiceImpl implements AttendanceService {
 
         Attendance attendance = new Attendance();
         apply(attendance, student, session, request);
-        return attendanceRepository.save(attendance);
+        Attendance saved = attendanceRepository.save(attendance);
+        auditService.record("Attendance", saved.getId(), AuditService.CREATE, null, saved);
+        eventPublisher.publishIfAbsent(saved);
+        return saved;
     }
 
     @Override
@@ -76,7 +87,10 @@ public class AttendanceServiceImpl implements AttendanceService {
         checkBusinessRules(student, session, request);
 
         apply(found, student, session, request);
-        return attendanceRepository.save(found);
+        Attendance saved = attendanceRepository.save(found);
+        auditService.record("Attendance", saved.getId(), AuditService.UPDATE, null, saved);
+        eventPublisher.publishIfAbsent(saved);
+        return saved;
     }
 
     private void checkBusinessRules(Student student, Session session, AttendanceRequest request) {
@@ -138,7 +152,9 @@ public class AttendanceServiceImpl implements AttendanceService {
 
     @Override
     public void deleteAttendance(UUID id) {
-        attendanceRepository.delete(findAttendanceById(id));
+        Attendance found = findAttendanceById(id);
+        auditService.record("Attendance", found.getId(), AuditService.DELETE, found, null);
+        attendanceRepository.delete(found);
     }
 
     @Override
