@@ -38,7 +38,8 @@ public class StudentServiceImpl implements StudentService {
             throw new BusinessRuleException("Registration number "
                     + theStudent.getRegNumber() + " is already used by another student.");
         }
-        if (studentRepository.existsByEmailIgnoreCase(theStudent.getEmail())) {
+        if (hasText(theStudent.getEmail())
+                && studentRepository.existsByEmailIgnoreCase(theStudent.getEmail())) {
             throw new BusinessRuleException("Email "
                     + theStudent.getEmail() + " is already used by another student.");
         }
@@ -57,7 +58,8 @@ public class StudentServiceImpl implements StudentService {
             throw new BusinessRuleException("Registration number "
                     + theStudent.getRegNumber() + " is already used by another student.");
         }
-        if (studentRepository.existsByEmailIgnoreCaseAndIdNot(theStudent.getEmail(), id)) {
+        if (hasText(theStudent.getEmail())
+                && studentRepository.existsByEmailIgnoreCaseAndIdNot(theStudent.getEmail(), id)) {
             throw new BusinessRuleException("Email "
                     + theStudent.getEmail() + " is already used by another student.");
         }
@@ -69,7 +71,8 @@ public class StudentServiceImpl implements StudentService {
         found.setEmail(theStudent.getEmail());
         found.setPhone(theStudent.getPhone());
         found.setGender(theStudent.getGender());
-        found.setProgram(theStudent.getProgram());
+        found.setSector(theStudent.getSector());
+        found.setStudentGroup(theStudent.getStudentGroup());
         found.setYearOfStudy(theStudent.getYearOfStudy());
         found.setActive(theStudent.isActive());
         Student saved = studentRepository.save(found);
@@ -123,9 +126,14 @@ public class StudentServiceImpl implements StudentService {
         copy.setEmail(current.getEmail());
         copy.setPhone(current.getPhone());
         copy.setGender(current.getGender());
-        copy.setProgram(current.getProgram());
+        copy.setSector(current.getSector());
+        copy.setStudentGroup(current.getStudentGroup());
         copy.setYearOfStudy(current.getYearOfStudy());
         copy.setActive(current.isActive());
         return copy;
+    }
+
+    private boolean hasText(String value) {
+        return value != null && !value.isBlank();
     }
 }

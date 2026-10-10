@@ -63,6 +63,21 @@ public class NotificationConsumer {
 
         Map<String, Object> attempt = new LinkedHashMap<>();
         attempt.put("at", LocalDateTime.now().toString());
+
+        // The register the centre keeps carries no contact details, so a student
+        // may have none. Saying so is more useful than a failed send.
+        String target = channel == NotificationChannel.EMAIL
+                ? event.getStudentEmail() : event.getStudentPhone();
+        if (target == null || target.isBlank()) {
+            attempt.put("outcome", "SKIPPED");
+            attempt.put("providerResponse",
+                    "No " + channel.name().toLowerCase() + " on record for this student");
+            log.setStatus(NotificationStatus.SKIPPED);
+            log.getAttempts().add(attempt);
+            notificationLogRepository.save(log);
+            return;
+        }
+
         try {
             String providerResponse = deliver(event, channel);
             attempt.put("outcome", "SENT");

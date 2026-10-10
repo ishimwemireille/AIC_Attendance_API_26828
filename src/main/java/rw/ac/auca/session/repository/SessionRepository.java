@@ -20,6 +20,9 @@ public interface SessionRepository extends JpaRepository<Session, UUID> {
 
     long countByCourseId(UUID courseId);
 
+    java.util.Optional<Session> findByCourseIdAndSessionDateAndStartTime(
+            UUID courseId, LocalDate sessionDate, LocalTime startTime);
+
     boolean existsBySessionDateAndStartTimeAndRoomIgnoreCase(
             LocalDate sessionDate, LocalTime startTime, String room);
 

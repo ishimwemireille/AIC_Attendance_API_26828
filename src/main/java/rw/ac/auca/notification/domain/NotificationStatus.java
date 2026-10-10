@@ -9,5 +9,8 @@ package rw.ac.auca.notification.domain;
 public enum NotificationStatus {
     PENDING,
     SENT,
-    FAILED
+    FAILED,
+
+    /** The student has no address or number on this channel, so nothing was sent. */
+    SKIPPED
 }

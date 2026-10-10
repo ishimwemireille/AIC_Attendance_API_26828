@@ -25,7 +25,6 @@ import rw.ac.auca.audit.service.AuditService;
 import rw.ac.auca.config.SecurityConfig;
 import rw.ac.auca.notification.repository.NotificationLogRepository;
 import rw.ac.auca.session.service.SessionService;
-import rw.ac.auca.student.service.StudentImportService;
 import rw.ac.auca.student.service.StudentService;
 import rw.ac.auca.user.service.AucaOidcUserService;
 import rw.ac.auca.user.service.CurrentUserService;
@@ -66,7 +65,7 @@ class AuthorizationMatrixTest {
     private static final String STUDENT_JSON = """
             {"regNumber":"24011","firstName":"Aline","lastName":"Uwase",
              "email":"aline.24011@auca.ac.rw","phone":"0788123456","gender":"Female",
-             "program":"Information Technology","yearOfStudy":3}""";
+             "sector":"Health","yearOfStudy":3}""";
 
     @Autowired
     private WebApplicationContext context;
@@ -85,7 +84,7 @@ class AuthorizationMatrixTest {
     }
 
     @MockitoBean private StudentService studentService;
-    @MockitoBean private StudentImportService studentImportService;
+    @MockitoBean private rw.ac.auca.register.RegisterImportService registerImportService;
     @MockitoBean private SessionService sessionService;
     @MockitoBean private CourseService courseService;
     @MockitoBean private CourseProgressService courseProgressService;
@@ -154,9 +153,9 @@ class AuthorizationMatrixTest {
 
     @Test
     @WithMockUser(roles = "TRAINER")
-    @DisplayName("a trainer may not import a spreadsheet of students")
-    void trainerMayNotImportStudents() throws Exception {
-        mockMvc.perform(multipart("/api/students/import")
+    @DisplayName("a trainer may not import an attendance register")
+    void trainerMayNotImportARegister() throws Exception {
+        mockMvc.perform(multipart("/api/courses/" + UUID.randomUUID() + "/import")
                         .file(new MockMultipartFile("file", "students.xlsx",
                                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                                 new byte[]{1, 2, 3})))

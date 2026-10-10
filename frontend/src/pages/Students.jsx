@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
-import { api, uploadStudents } from '../api'
+import { api } from '../api'
 
 const BLANK = {
   regNumber: '', firstName: '', lastName: '', email: '', phone: '',
-  gender: 'Female', program: 'Information Technology', yearOfStudy: 1,
+  gender: 'Female', sector: 'Health', studentGroup: 'GROUP A', yearOfStudy: 1,
 }
 
 export default function Students({ user }) {
@@ -12,7 +12,6 @@ export default function Students({ user }) {
   const [form, setForm] = useState(BLANK)
   const [showForm, setShowForm] = useState(false)
   const [editing, setEditing] = useState(null)
-  const [importResult, setImportResult] = useState(null)
   const [error, setError] = useState(null)
   const [busy, setBusy] = useState(false)
 
@@ -38,20 +37,6 @@ export default function Students({ user }) {
     }
   }
 
-  async function onFile(event) {
-    const file = event.target.files?.[0]
-    if (!file) return
-    setBusy(true); setError(null); setImportResult(null)
-    try {
-      setImportResult(await uploadStudents(file))
-      load()
-    } catch (problem) {
-      setError(problem.message)
-    } finally {
-      setBusy(false)
-      event.target.value = ''
-    }
-  }
 
   async function remove(student) {
     if (!window.confirm(`Remove ${student.firstName} ${student.lastName}?`)) return
@@ -63,14 +48,15 @@ export default function Students({ user }) {
     setForm({
       regNumber: student.regNumber, firstName: student.firstName, lastName: student.lastName,
       email: student.email, phone: student.phone, gender: student.gender,
-      program: student.program, yearOfStudy: student.yearOfStudy,
+      sector: student.sector, studentGroup: student.studentGroup || '',
+      yearOfStudy: student.yearOfStudy,
     })
     setShowForm(true); setError(null)
   }
 
   const shown = (students || []).filter((s) => {
     const q = query.trim().toLowerCase()
-    return !q || `${s.firstName} ${s.lastName} ${s.regNumber} ${s.program}`.toLowerCase().includes(q)
+    return !q || `${s.firstName} ${s.lastName} ${s.regNumber} ${s.sector} ${s.studentGroup || ''}`.toLowerCase().includes(q)
   })
 
   return (
@@ -80,16 +66,6 @@ export default function Students({ user }) {
           <h1>Students</h1>
           <p>{students ? `${students.filter((s) => s.active).length} active of ${students.length}` : 'Loading…'}</p>
         </div>
-        {canWrite && (
-          <a className="btn ghost" href="/api/students/import/template">Template</a>
-        )}
-        {canWrite && (
-          <label className="btn ghost" style={{ cursor: 'pointer' }}>
-            {busy ? 'Reading…' : 'Import Excel'}
-            <input type="file" accept=".xlsx" onChange={onFile}
-                   style={{ position: 'absolute', width: 1, height: 1, opacity: 0 }} />
-          </label>
-        )}
         {canWrite && (
           <button className="btn" onClick={() => {
             if (showForm) { setShowForm(false); return }
@@ -103,18 +79,6 @@ export default function Students({ user }) {
       <div className="content">
         {error && <div className="banner error">{error}</div>}
 
-        {importResult && (
-          <div className={importResult.failed ? 'banner error' : 'banner ok'}>
-            <strong>{importResult.imported} student(s) imported, {importResult.failed} rejected.</strong>
-            {importResult.errors.length > 0 && (
-              <ul style={{ margin: '8px 0 0', paddingLeft: 20 }}>
-                {importResult.errors.map((e) => (
-                  <li key={e.row}>Row {e.row}: {e.message}</li>
-                ))}
-              </ul>
-            )}
-          </div>
-        )}
 
         {showForm && canWrite && (
           <form className="card" onSubmit={save}>
@@ -124,13 +88,15 @@ export default function Students({ user }) {
             <div className="form-grid">
               <Field label="Registration number" value={form.regNumber} hint="Exactly 5 digits"
                      onChange={(v) => setForm({ ...form, regNumber: v })} />
-              <Field label="Email" type="email" value={form.email}
+              <Field label="Email" type="email" value={form.email} optional
+                     hint="Optional. Without one, no email alert is sent."
                      onChange={(v) => setForm({ ...form, email: v })} />
               <Field label="First name" value={form.firstName}
                      onChange={(v) => setForm({ ...form, firstName: v })} />
               <Field label="Last name" value={form.lastName}
                      onChange={(v) => setForm({ ...form, lastName: v })} />
-              <Field label="Phone" value={form.phone} hint="10 digits starting 07"
+              <Field label="Phone" value={form.phone} optional
+                     hint="Optional. 10 digits starting 07."
                      onChange={(v) => setForm({ ...form, phone: v })} />
               <div className="field">
                 <label htmlFor="gender">Gender</label>
@@ -140,13 +106,24 @@ export default function Students({ user }) {
                 </select>
               </div>
               <div className="field">
-                <label htmlFor="program">Program</label>
-                <select id="program" value={form.program}
-                        onChange={(e) => setForm({ ...form, program: e.target.value })}>
-                  <option>Information Technology</option>
-                  <option>Software Engineering</option>
-                  <option>Business IT</option>
+                <label htmlFor="sector">Sector</label>
+                <select id="sector" value={form.sector}
+                        onChange={(e) => setForm({ ...form, sector: e.target.value })}>
+                  <option>Agriculture</option>
+                  <option>Crime Prevention</option>
+                  <option>Education</option>
+                  <option>Fintech</option>
+                  <option>Health</option>
                 </select>
+              </div>
+              <div className="field">
+                <label htmlFor="group">Group</label>
+                <select id="group" value={form.studentGroup}
+                        onChange={(e) => setForm({ ...form, studentGroup: e.target.value })}>
+                  <option>GROUP A</option>
+                  <option>GROUP B</option>
+                </select>
+                <span className="hint">Both groups take the same course at the same time.</span>
               </div>
               <div className="field">
                 <label htmlFor="year">Year of study</label>
@@ -164,7 +141,7 @@ export default function Students({ user }) {
 
         <div className="field" style={{ maxWidth: 420 }}>
           <label htmlFor="search">Search</label>
-          <input id="search" type="search" value={query} placeholder="Name, registration number or program"
+          <input id="search" type="search" value={query} placeholder="Name, registration number, sector or group"
                  onChange={(e) => setQuery(e.target.value)} />
         </div>
 
@@ -175,7 +152,7 @@ export default function Students({ user }) {
               <table className="table">
                 <thead>
                   <tr>
-                    <th>Reg no.</th><th>Student</th><th>Program</th>
+                    <th>Reg no.</th><th>Student</th><th>Sector</th><th>Group</th>
                     <th>Year</th><th>Phone</th><th>Status</th>{canWrite && <th></th>}
                   </tr>
                 </thead>
@@ -185,7 +162,12 @@ export default function Students({ user }) {
                       <td data-label="Reg no." className="num"><strong>{s.regNumber}</strong></td>
                       <td data-label="Student">{s.firstName} {s.lastName}<br />
                         <span className="stat-note">{s.email}</span></td>
-                      <td data-label="Program">{s.program}</td>
+                      <td data-label="Sector">{s.sector}</td>
+                      <td data-label="Group">
+                        {s.studentGroup
+                          ? <span className="pill muted">{s.studentGroup}</span>
+                          : <span className="stat-note">—</span>}
+                      </td>
                       <td data-label="Year" className="num">{s.yearOfStudy}</td>
                       <td data-label="Phone" className="num">{s.phone}</td>
                       <td data-label="Status">
@@ -214,12 +196,13 @@ export default function Students({ user }) {
   )
 }
 
-function Field({ label, value, onChange, type = 'text', hint }) {
+function Field({ label, value, onChange, type = 'text', hint, optional }) {
   const id = label.toLowerCase().replace(/\s+/g, '-')
   return (
     <div className="field">
       <label htmlFor={id}>{label}</label>
-      <input id={id} type={type} value={value} required onChange={(e) => onChange(e.target.value)} />
+      <input id={id} type={type} value={value} required={!optional}
+             onChange={(e) => onChange(e.target.value)} />
       {hint && <span className="hint">{hint}</span>}
     </div>
   )

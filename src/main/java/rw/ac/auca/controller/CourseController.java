@@ -13,7 +13,12 @@ import rw.ac.auca.course.service.CourseActivityRequest;
 import rw.ac.auca.course.service.CourseProgress;
 import rw.ac.auca.course.service.CourseProgressService;
 import rw.ac.auca.course.service.CourseService;
+import rw.ac.auca.register.RegisterImportResult;
+import rw.ac.auca.register.RegisterImportService;
 import rw.ac.auca.user.service.CurrentUserService;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -33,6 +38,9 @@ public class CourseController {
 
     @Autowired
     private CourseProgressService courseProgressService;
+
+    @Autowired
+    private RegisterImportService registerImportService;
 
     @Autowired
     private CurrentUserService currentUserService;
@@ -96,5 +104,28 @@ public class CourseController {
     public CourseActivity logActivity(@PathVariable UUID id,
                                       @Valid @RequestBody CourseActivityRequest request) {
         return courseProgressService.logActivity(id, request);
+    }
+
+    /**
+     * Upload the attendance register the centre already keeps. One file brings
+     * in the roster, a session for every date column, and the attendance.
+     */
+    @PostMapping(value = "/{id}/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAnyRole('ADMIN', 'COHORT_LEADER')")
+    public RegisterImportResult importRegister(@PathVariable UUID id,
+                                               @RequestParam("file") MultipartFile file) {
+        return registerImportService.importInto(id, file);
+    }
+
+    /** An empty register in the centre's own shape. */
+    @GetMapping("/import/template")
+    @PreAuthorize("hasAnyRole('ADMIN', 'COHORT_LEADER')")
+    public ResponseEntity<byte[]> importTemplate() {
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"attendance-register-template.xlsx\"")
+                .contentType(MediaType.parseMediaType(
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(registerImportService.template());
     }
 }

@@ -54,12 +54,12 @@ function messageFrom(body, status) {
   return `The request failed (${status}).`
 }
 
-export async function uploadStudents(file) {
+export async function importRegister(courseId, file) {
   const token = sessionStorage.getItem(KEY)
   const body = new FormData()
   body.append('file', file)
   // No Content-Type here: the browser must set it so the multipart boundary is right.
-  const response = await fetch('/api/students/import', {
+  const response = await fetch(`/api/courses/${courseId}/import`, {
     method: 'POST',
     credentials: 'include',
     headers: token ? { Authorization: `Basic ${token}` } : {},

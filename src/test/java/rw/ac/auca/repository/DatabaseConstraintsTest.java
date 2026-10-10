@@ -89,7 +89,8 @@ class DatabaseConstraintsTest {
         student.setEmail(email);
         student.setPhone("0788123456");
         student.setGender("Female");
-        student.setProgram("Information Technology");
+        student.setSector("Health");
+        student.setStudentGroup("GROUP A");
         student.setYearOfStudy(3);
         student.setActive(true);
         return student;

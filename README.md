@@ -220,16 +220,33 @@ request. Two jobs: the API with its full test suite against a real PostgreSQL
 service container, and the front end build. A badge for the result sits at the
 top of this file once the first run completes.
 
-## Registering a cohort from a spreadsheet
+## Importing the attendance register
 
-Typing a cohort in one form at a time is the slowest part of setting the system
-up, so **Students → Import Excel** takes an `.xlsx`. **Template** downloads an
-empty one with the right columns.
+The centre already keeps its register in Excel, so the system reads that file
+rather than asking anyone to retype it. **Courses → Import register** on the
+course the register belongs to; **Template** downloads an empty one.
 
-Every row is validated with the same rules the JSON endpoint uses, so a
-spreadsheet cannot create a record the API would have refused. A bad row never
-stops the import: the response reports how many were taken and names each row
-that was not, with the reason.
+The file is not a list of students, it is the register itself:
+
+```
+NAME | STUDENT ID | GENDER | SECTOR | Aug 16 | Aug 18 | ...
+```
+
+Each sheet is a teaching group, and every column after the fourth is a date on
+which attendance was taken. One upload therefore brings in the roster, a
+session for each date, and the attendance. Column headers that are not a date
+(Excel's own `Column 6` filler) are reported as ignored rather than guessed at,
+and both spellings of *Excuse* and *Excused* are accepted because the two
+sheets disagree.
+
+Imported attendance is taken as given. It was recorded on paper under the
+centre's own practice, so the marking rules this system applies — a time in for
+anyone present, a written reason for an absence — are not imposed on history
+that predates it, and nothing is notified: those absences happened weeks ago.
+
+Email and phone are optional, because the register carries neither. A student
+without them simply receives no alert, and the notification log records that
+the channel was skipped rather than pretending it was sent.
 
 ## A note on the database name
 

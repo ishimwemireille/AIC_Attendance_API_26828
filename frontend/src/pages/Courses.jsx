@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { api } from '../api'
+import { api, importRegister } from '../api'
 
 const BLANK = {
   code: '', title: '', description: '', sequence: 1,
@@ -14,6 +14,8 @@ export default function Courses({ user }) {
   const [showForm, setShowForm] = useState(false)
   const [error, setError] = useState(null)
   const [busy, setBusy] = useState(false)
+  const [importResult, setImportResult] = useState(null)
+  const [importing, setImporting] = useState(null)
 
   const canWrite = user.roles.includes('ADMIN') || user.roles.includes('COHORT_LEADER')
   const today = new Date().toISOString().slice(0, 10)
@@ -52,6 +54,20 @@ export default function Courses({ user }) {
     }
   }
 
+  async function onRegister(event, course) {
+    const file = event.target.files?.[0]
+    if (!file) return
+    setImporting(course.id); setError(null); setImportResult(null)
+    try {
+      setImportResult({ course: course.title, ...(await importRegister(course.id, file)) })
+    } catch (problem) {
+      setError(problem.message)
+    } finally {
+      setImporting(null)
+      event.target.value = ''
+    }
+  }
+
   async function remove(course) {
     if (!window.confirm(`Delete "${course.title}"?`)) return
     try { await api.deleteCourse(course.id); load() } catch (p) { setError(p.message) }
@@ -68,8 +84,11 @@ export default function Courses({ user }) {
       <div className="topbar">
         <div className="grow">
           <h1>Courses</h1>
-          <p>The cohort takes these one after another, so their dates may not overlap.</p>
+          <p>The cohort takes these one after another, so their dates may not overlap. Import a register to bring in students, sessions and attendance at once.</p>
         </div>
+        {canWrite && (
+          <a className="btn ghost" href="/api/courses/import/template">Template</a>
+        )}
         {canWrite && (
           <button className="btn" onClick={() => {
             if (showForm) { setShowForm(false); return }
@@ -82,6 +101,30 @@ export default function Courses({ user }) {
 
       <div className="content">
         {error && <div className="banner error">{error}</div>}
+
+        {importResult && (
+          <div className={importResult.problems.length ? 'banner error' : 'banner ok'}>
+            <strong>Register imported into {importResult.course}.</strong>
+            <br />
+            {importResult.studentsCreated} student(s) added,
+            {' '}{importResult.studentsAlreadyKnown} already known,
+            {' '}{importResult.sessionsCreated} session(s) created,
+            {' '}{importResult.attendanceCreated} attendance record(s) written.
+            {importResult.columnsIgnored.length > 0 && (
+              <div style={{ marginTop: 6 }}>
+                Columns that were not a date, so carried no attendance:
+                {' '}{importResult.columnsIgnored.join(', ')}
+              </div>
+            )}
+            {importResult.problems.length > 0 && (
+              <ul style={{ margin: '8px 0 0', paddingLeft: 20 }}>
+                {importResult.problems.map((p, i) => (
+                  <li key={i}>{p.sheet} row {p.row}: {p.message}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
 
         {showForm && canWrite && (
           <form className="card" onSubmit={save}>
@@ -159,6 +202,13 @@ export default function Courses({ user }) {
                       <span className={`pill ${state.pill}`}>{state.label}</span>
                       {canWrite && (
                         <span style={{ display: 'flex', gap: 8 }}>
+                          <label className="btn ghost"
+                                 style={{ minHeight: 36, padding: '0 12px', cursor: 'pointer' }}>
+                            {importing === c.id ? 'Reading…' : 'Import register'}
+                            <input type="file" accept=".xlsx"
+                                   onChange={(e) => onRegister(e, c)}
+                                   style={{ position: 'absolute', width: 1, height: 1, opacity: 0 }} />
+                          </label>
                           <button className="btn ghost" style={{ minHeight: 36, padding: '0 12px' }}
                                   onClick={() => startEdit(c)}>Edit</button>
                           <button className="btn ghost" style={{ minHeight: 36, padding: '0 12px' }}
