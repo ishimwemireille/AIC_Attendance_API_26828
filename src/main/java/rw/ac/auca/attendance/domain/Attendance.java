@@ -18,6 +18,7 @@ import org.hibernate.annotations.Check;
 import rw.ac.auca.base.BaseEntity;
 import rw.ac.auca.session.domain.Session;
 import rw.ac.auca.student.domain.Student;
+import rw.ac.auca.user.domain.User;
 
 import java.time.LocalTime;
 
@@ -45,6 +46,11 @@ public class Attendance extends BaseEntity {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "session_id", nullable = false)
     private Session session;
+
+    @NotNull(message = "The member of staff taking the record is required")
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "recorded_by", nullable = false)
+    private User recordedBy;
 
     @JsonFormat(pattern = "HH:mm")
     @Column(name = "time_in")

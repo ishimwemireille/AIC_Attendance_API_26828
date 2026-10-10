@@ -12,9 +12,16 @@ import java.util.UUID;
  * @version 1.0
  */
 public interface SessionService {
-    Session createSession(Session theSession);
-    Session updateSession(UUID id, Session theSession);
+
+    Session createSession(SessionRequest request);
+
+    Session updateSession(UUID id, SessionRequest request);
+
     void deleteSession(UUID id);
+
     Session findSessionById(UUID id);
+
     List<Session> findAllSessions();
+
+    List<Session> findByTrainer(UUID trainerId);
 }

@@ -14,6 +14,8 @@ public interface SessionRepository extends JpaRepository<Session, UUID> {
 
     List<Session> findAllByOrderBySessionDateDescStartTimeAsc();
 
+    List<Session> findByTrainerIdOrderBySessionDateDescStartTimeAsc(UUID trainerId);
+
     boolean existsBySessionDateAndStartTimeAndRoomIgnoreCase(
             LocalDate sessionDate, LocalTime startTime, String room);
 

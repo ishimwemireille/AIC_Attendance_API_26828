@@ -12,6 +12,7 @@ import rw.ac.auca.session.domain.Session;
 import rw.ac.auca.session.service.SessionService;
 import rw.ac.auca.student.domain.Student;
 import rw.ac.auca.student.service.StudentService;
+import rw.ac.auca.user.service.CurrentUserService;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -35,6 +36,9 @@ public class AttendanceServiceImpl implements AttendanceService {
 
     @Autowired
     private SessionService sessionService;
+
+    @Autowired
+    private CurrentUserService currentUserService;
 
     @Override
     public Attendance markAttendance(AttendanceRequest request) {
@@ -124,6 +128,7 @@ public class AttendanceServiceImpl implements AttendanceService {
         AttendanceStatus status = request.getStatus();
         attendance.setStudent(student);
         attendance.setSession(session);
+        attendance.setRecordedBy(currentUserService.require());
         attendance.setStatus(status);
         attendance.setRemarks(request.getRemarks());
         attendance.setTimeIn(
@@ -147,7 +152,15 @@ public class AttendanceServiceImpl implements AttendanceService {
     @Override
     @Transactional(readOnly = true)
     public List<Attendance> findAllAttendances() {
-        return attendanceRepository.findAllWithDetails();
+        List<Attendance> all = attendanceRepository.findAllWithDetails();
+        // FR-6: a trainer sees only records for the sessions they teach.
+        if (currentUserService.isTrainerOnly()) {
+            UUID trainerId = currentUserService.require().getId();
+            return all.stream()
+                    .filter(record -> record.getSession().getTrainer().getId().equals(trainerId))
+                    .toList();
+        }
+        return all;
     }
 
     @Override
