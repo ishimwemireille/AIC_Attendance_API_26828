@@ -248,6 +248,14 @@ Email and phone are optional, because the register carries neither. A student
 without them simply receives no alert, and the notification log records that
 the channel was skipped rather than pretending it was sent.
 
+The fourth column is headed `SECTOR` in the centre's file but holds the
+**thematic area** the student works in — Agriculture, Crime Prevention,
+Education, Fintech or Health — so that is what it is called in the system.
+
+A student has no year of study. The register does not record one and the
+programme does not use one, so rather than store a number nobody set, the
+field is gone.
+
 ## A note on the database name
 
 The schema changed when courses were introduced, in a way `ddl-auto=update`

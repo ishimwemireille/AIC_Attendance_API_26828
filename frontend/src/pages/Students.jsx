@@ -3,7 +3,7 @@ import { api } from '../api'
 
 const BLANK = {
   regNumber: '', firstName: '', lastName: '', email: '', phone: '',
-  gender: 'Female', sector: 'Health', studentGroup: 'GROUP A', yearOfStudy: 1,
+  gender: 'Female', thematicArea: 'Health', studentGroup: 'GROUP A',
 }
 
 export default function Students({ user }) {
@@ -26,7 +26,7 @@ export default function Students({ user }) {
     event.preventDefault()
     setBusy(true); setError(null)
     try {
-      const body = { ...form, yearOfStudy: Number(form.yearOfStudy) }
+      const body = { ...form }
       if (editing) await api.updateStudent(editing, body)
       else await api.createStudent(body)
       setForm(BLANK); setEditing(null); setShowForm(false); load()
@@ -48,15 +48,14 @@ export default function Students({ user }) {
     setForm({
       regNumber: student.regNumber, firstName: student.firstName, lastName: student.lastName,
       email: student.email, phone: student.phone, gender: student.gender,
-      sector: student.sector, studentGroup: student.studentGroup || '',
-      yearOfStudy: student.yearOfStudy,
+      thematicArea: student.thematicArea, studentGroup: student.studentGroup || '',
     })
     setShowForm(true); setError(null)
   }
 
   const shown = (students || []).filter((s) => {
     const q = query.trim().toLowerCase()
-    return !q || `${s.firstName} ${s.lastName} ${s.regNumber} ${s.sector} ${s.studentGroup || ''}`.toLowerCase().includes(q)
+    return !q || `${s.firstName} ${s.lastName} ${s.regNumber} ${s.thematicArea} ${s.studentGroup || ''}`.toLowerCase().includes(q)
   })
 
   return (
@@ -106,9 +105,9 @@ export default function Students({ user }) {
                 </select>
               </div>
               <div className="field">
-                <label htmlFor="sector">Sector</label>
-                <select id="sector" value={form.sector}
-                        onChange={(e) => setForm({ ...form, sector: e.target.value })}>
+                <label htmlFor="sector">Thematic area</label>
+                <select id="sector" value={form.thematicArea}
+                        onChange={(e) => setForm({ ...form, thematicArea: e.target.value })}>
                   <option>Agriculture</option>
                   <option>Crime Prevention</option>
                   <option>Education</option>
@@ -125,13 +124,6 @@ export default function Students({ user }) {
                 </select>
                 <span className="hint">Both groups take the same course at the same time.</span>
               </div>
-              <div className="field">
-                <label htmlFor="year">Year of study</label>
-                <select id="year" value={form.yearOfStudy}
-                        onChange={(e) => setForm({ ...form, yearOfStudy: e.target.value })}>
-                  {[1, 2, 3, 4, 5].map((y) => <option key={y} value={y}>Year {y}</option>)}
-                </select>
-              </div>
             </div>
             <button className="btn" type="submit" disabled={busy} style={{ marginTop: 16 }}>
               {busy ? 'Saving…' : editing ? 'Update student' : 'Save student'}
@@ -141,7 +133,7 @@ export default function Students({ user }) {
 
         <div className="field" style={{ maxWidth: 420 }}>
           <label htmlFor="search">Search</label>
-          <input id="search" type="search" value={query} placeholder="Name, registration number, sector or group"
+          <input id="search" type="search" value={query} placeholder="Name, registration number, thematic area or group"
                  onChange={(e) => setQuery(e.target.value)} />
         </div>
 
@@ -152,8 +144,8 @@ export default function Students({ user }) {
               <table className="table">
                 <thead>
                   <tr>
-                    <th>Reg no.</th><th>Student</th><th>Sector</th><th>Group</th>
-                    <th>Year</th><th>Phone</th><th>Status</th>{canWrite && <th></th>}
+                    <th>Reg no.</th><th>Student</th><th>Thematic area</th><th>Group</th>
+                    <th>Phone</th><th>Status</th>{canWrite && <th></th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -162,13 +154,12 @@ export default function Students({ user }) {
                       <td data-label="Reg no." className="num"><strong>{s.regNumber}</strong></td>
                       <td data-label="Student">{s.firstName} {s.lastName}<br />
                         <span className="stat-note">{s.email}</span></td>
-                      <td data-label="Sector">{s.sector}</td>
+                      <td data-label="Thematic area">{s.thematicArea}</td>
                       <td data-label="Group">
                         {s.studentGroup
                           ? <span className="pill muted">{s.studentGroup}</span>
                           : <span className="stat-note">—</span>}
                       </td>
-                      <td data-label="Year" className="num">{s.yearOfStudy}</td>
                       <td data-label="Phone" className="num">{s.phone}</td>
                       <td data-label="Status">
                         <span className={s.active ? 'pill PRESENT' : 'pill muted'}>

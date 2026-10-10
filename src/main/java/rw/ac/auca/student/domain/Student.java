@@ -4,8 +4,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -25,8 +23,7 @@ import rw.ac.auca.base.BaseEntity;
 @Entity
 @Table(name = "students")
 @Check(constraints = "LENGTH(first_name) >= 2 AND LENGTH(last_name) >= 2 "
-        + "AND gender IN ('Male', 'Female') "
-        + "AND year_of_study BETWEEN 1 AND 5")
+        + "AND gender IN ('Male', 'Female')")
 public class Student extends BaseEntity {
 
     @NotBlank(message = "Registration number is required")
@@ -63,10 +60,14 @@ public class Student extends BaseEntity {
     @Column(name = "gender", nullable = false, length = 6)
     private String gender;
 
-    @NotBlank(message = "Sector is required")
-    @Size(min = 2, max = 40, message = "Sector must be between 2 and 40 characters")
-    @Column(name = "sector", nullable = false, length = 40)
-    private String sector;
+    @NotBlank(message = "Thematic area is required")
+    @Size(min = 2, max = 40, message = "Thematic area must be between 2 and 40 characters")
+    /**
+     * The thematic area the student works in: Agriculture, Crime Prevention,
+     * Education, Fintech or Health. The register spells the column SECTOR.
+     */
+    @Column(name = "thematic_area", nullable = false, length = 40)
+    private String thematicArea;
 
     /**
      * Which of the teaching groups the student sits in. They all take the same
@@ -77,10 +78,6 @@ public class Student extends BaseEntity {
     @Column(name = "student_group", length = 20)
     private String studentGroup;
 
-    @Min(value = 1, message = "Year of study must be at least 1")
-    @Max(value = 5, message = "Year of study cannot be more than 5")
-    @Column(name = "year_of_study", nullable = false)
-    private int yearOfStudy;
 
     @Column(name = "active", nullable = false)
     private boolean active = Boolean.TRUE;

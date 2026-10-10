@@ -120,7 +120,7 @@ export default function MarkAttendance() {
                   <tr key={student.id}>
                     <td data-label="Student">
                       <strong>{student.firstName} {student.lastName}</strong><br />
-                      <span className="stat-note num">{student.regNumber} · Year {student.yearOfStudy}</span>
+                      <span className="stat-note num">{student.regNumber}{student.thematicArea ? ` · ${student.thematicArea}` : ''}{student.studentGroup ? ` · ${student.studentGroup}` : ''}</span>
                     </td>
                     <td data-label="Status" className="stack">
                       <div className="status-group">

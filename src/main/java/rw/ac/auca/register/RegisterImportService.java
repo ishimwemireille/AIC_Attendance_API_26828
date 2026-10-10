@@ -47,6 +47,9 @@ import java.util.UUID;
  *
  *   NAME | STUDENT ID | GENDER | SECTOR | Aug 16 | Aug 18 | ...
  *
+ * The fourth column is headed SECTOR in the centre's file but holds the
+ * thematic area the student works in, so that is what it is called here.
+ *
  * Imported attendance is taken as given. It was recorded on paper under the
  * centre's own practice, so the rules that govern marking in this system - a
  * time in for anyone present, a written reason for an absence - are not
@@ -62,7 +65,7 @@ public class RegisterImportService {
     private static final int NAME = 0;
     private static final int STUDENT_ID = 1;
     private static final int GENDER = 2;
-    private static final int SECTOR = 3;
+    private static final int THEMATIC_AREA = 3;
     private static final int FIRST_DATE_COLUMN = 4;
 
     private static final LocalTime DEFAULT_START = LocalTime.of(8, 0);
@@ -170,9 +173,8 @@ public class RegisterImportService {
                     student.setRegNumber(regNumber);
                     applyName(student, text(row.getCell(NAME)));
                     student.setGender(gender(text(row.getCell(GENDER))));
-                    student.setSector(blankTo(text(row.getCell(SECTOR)), "Not recorded"));
+                    student.setThematicArea(blankTo(text(row.getCell(THEMATIC_AREA)), "Not recorded"));
                     student.setStudentGroup(group);
-                    student.setYearOfStudy(1);
                     student.setActive(true);
                     Student saved = studentRepository.save(student);
                     result.setStudentsCreated(result.getStudentsCreated() + 1);

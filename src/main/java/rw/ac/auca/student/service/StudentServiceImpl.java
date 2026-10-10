@@ -71,9 +71,8 @@ public class StudentServiceImpl implements StudentService {
         found.setEmail(theStudent.getEmail());
         found.setPhone(theStudent.getPhone());
         found.setGender(theStudent.getGender());
-        found.setSector(theStudent.getSector());
+        found.setThematicArea(theStudent.getThematicArea());
         found.setStudentGroup(theStudent.getStudentGroup());
-        found.setYearOfStudy(theStudent.getYearOfStudy());
         found.setActive(theStudent.isActive());
         Student saved = studentRepository.save(found);
         auditService.record("Student", saved.getId(), AuditService.UPDATE, before, saved);
@@ -126,9 +125,8 @@ public class StudentServiceImpl implements StudentService {
         copy.setEmail(current.getEmail());
         copy.setPhone(current.getPhone());
         copy.setGender(current.getGender());
-        copy.setSector(current.getSector());
+        copy.setThematicArea(current.getThematicArea());
         copy.setStudentGroup(current.getStudentGroup());
-        copy.setYearOfStudy(current.getYearOfStudy());
         copy.setActive(current.isActive());
         return copy;
     }

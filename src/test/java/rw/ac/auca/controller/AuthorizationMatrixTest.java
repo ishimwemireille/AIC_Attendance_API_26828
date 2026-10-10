@@ -65,7 +65,7 @@ class AuthorizationMatrixTest {
     private static final String STUDENT_JSON = """
             {"regNumber":"24011","firstName":"Aline","lastName":"Uwase",
              "email":"aline.24011@auca.ac.rw","phone":"0788123456","gender":"Female",
-             "sector":"Health","yearOfStudy":3}""";
+             "thematicArea":"Health"}""";
 
     @Autowired
     private WebApplicationContext context;
