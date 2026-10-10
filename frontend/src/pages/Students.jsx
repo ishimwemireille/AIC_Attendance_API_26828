@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { api } from '../api'
+import { api, uploadStudents } from '../api'
 
 const BLANK = {
   regNumber: '', firstName: '', lastName: '', email: '', phone: '',
@@ -12,6 +12,7 @@ export default function Students({ user }) {
   const [form, setForm] = useState(BLANK)
   const [showForm, setShowForm] = useState(false)
   const [editing, setEditing] = useState(null)
+  const [importResult, setImportResult] = useState(null)
   const [error, setError] = useState(null)
   const [busy, setBusy] = useState(false)
 
@@ -34,6 +35,21 @@ export default function Students({ user }) {
       setError(problem.message)
     } finally {
       setBusy(false)
+    }
+  }
+
+  async function onFile(event) {
+    const file = event.target.files?.[0]
+    if (!file) return
+    setBusy(true); setError(null); setImportResult(null)
+    try {
+      setImportResult(await uploadStudents(file))
+      load()
+    } catch (problem) {
+      setError(problem.message)
+    } finally {
+      setBusy(false)
+      event.target.value = ''
     }
   }
 
@@ -65,6 +81,16 @@ export default function Students({ user }) {
           <p>{students ? `${students.filter((s) => s.active).length} active of ${students.length}` : 'Loading…'}</p>
         </div>
         {canWrite && (
+          <a className="btn ghost" href="/api/students/import/template">Template</a>
+        )}
+        {canWrite && (
+          <label className="btn ghost" style={{ cursor: 'pointer' }}>
+            {busy ? 'Reading…' : 'Import Excel'}
+            <input type="file" accept=".xlsx" onChange={onFile}
+                   style={{ position: 'absolute', width: 1, height: 1, opacity: 0 }} />
+          </label>
+        )}
+        {canWrite && (
           <button className="btn" onClick={() => {
             if (showForm) { setShowForm(false); return }
             setEditing(null); setForm(BLANK); setShowForm(true); setError(null)
@@ -76,6 +102,19 @@ export default function Students({ user }) {
 
       <div className="content">
         {error && <div className="banner error">{error}</div>}
+
+        {importResult && (
+          <div className={importResult.failed ? 'banner error' : 'banner ok'}>
+            <strong>{importResult.imported} student(s) imported, {importResult.failed} rejected.</strong>
+            {importResult.errors.length > 0 && (
+              <ul style={{ margin: '8px 0 0', paddingLeft: 20 }}>
+                {importResult.errors.map((e) => (
+                  <li key={e.row}>Row {e.row}: {e.message}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
 
         {showForm && canWrite && (
           <form className="card" onSubmit={save}>

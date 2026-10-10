@@ -16,13 +16,16 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Check;
 import rw.ac.auca.base.BaseEntity;
-import rw.ac.auca.user.domain.User;
+import rw.ac.auca.course.domain.Course;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 /**
- * The Class Session.
+ * The Class Session. One sitting of a course.
+ *
+ * The trainer is not held here: it belongs to the course, so a session cannot
+ * disagree with the course it is part of about who teaches it.
  *
  * @author Ishimwe Mireille
  * @version 1.0
@@ -61,10 +64,10 @@ public class Session extends BaseEntity {
     @Column(name = "room", nullable = false, length = 20)
     private String room;
 
-    @NotNull(message = "Trainer is required")
+    @NotNull(message = "Course is required")
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "trainer_id", nullable = false)
-    private User trainer;
+    @JoinColumn(name = "course_id", nullable = false)
+    private Course course;
 
     @Min(value = 1, message = "Capacity must be at least 1")
     @Column(name = "capacity", nullable = false)

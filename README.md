@@ -114,6 +114,18 @@ Import `postman_collection.json` from the root of this repository. It contains e
 endpoint and a folder of requests that deliberately break each business rule so the
 error responses can be demonstrated.
 
+## The programme
+
+The cohort moves through the courses one after another: DevOps, Web Technology,
+Internet UI and UX, Mobile Programming, Artificial Intelligence, Internet of
+Things. A `Course` carries its position in the programme, the dates it runs and
+the trainer who leads it; a `Session` belongs to a course and must fall inside
+its dates. Two courses may not overlap, because the cohort can only be in one
+at a time.
+
+Every active student is expected at every session of every course, so there is
+no enrolment table: the roster is simply the active students.
+
 ## Running the whole system
 
 Three pieces: PostgreSQL (installed locally), MongoDB and RabbitMQ (containers),
@@ -207,3 +219,22 @@ that PostgreSQL accepts.
 request. Two jobs: the API with its full test suite against a real PostgreSQL
 service container, and the front end build. A badge for the result sits at the
 top of this file once the first run completes.
+
+## Registering a cohort from a spreadsheet
+
+Typing a cohort in one form at a time is the slowest part of setting the system
+up, so **Students → Import Excel** takes an `.xlsx`. **Template** downloads an
+empty one with the right columns.
+
+Every row is validated with the same rules the JSON endpoint uses, so a
+spreadsheet cannot create a record the API would have refused. A bad row never
+stops the import: the response reports how many were taken and names each row
+that was not, with the reason.
+
+## A note on the database name
+
+The schema changed when courses were introduced, in a way `ddl-auto=update`
+cannot migrate: sessions gained a non-null course. The application therefore
+points at `aic_attendance`. If you have an older `aicattendance` or
+`aicattendancedb` lying around from before, they are no longer used and can be
+dropped.

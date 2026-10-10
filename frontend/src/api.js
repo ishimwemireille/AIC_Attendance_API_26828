@@ -54,6 +54,24 @@ function messageFrom(body, status) {
   return `The request failed (${status}).`
 }
 
+export async function uploadStudents(file) {
+  const token = sessionStorage.getItem(KEY)
+  const body = new FormData()
+  body.append('file', file)
+  // No Content-Type here: the browser must set it so the multipart boundary is right.
+  const response = await fetch('/api/students/import', {
+    method: 'POST',
+    credentials: 'include',
+    headers: token ? { Authorization: `Basic ${token}` } : {},
+    body,
+  })
+  const payload = await response.json().catch(() => null)
+  if (!response.ok) {
+    throw new ApiError(messageFrom(payload, response.status), response.status, payload)
+  }
+  return payload
+}
+
 export class ApiError extends Error {
   constructor(message, status, body) {
     super(message)
@@ -68,6 +86,14 @@ export const api = {
   createStudent: (student) => request('/students', { method: 'POST', body: JSON.stringify(student) }),
   updateStudent: (id, student) => request(`/students/${id}`, { method: 'PUT', body: JSON.stringify(student) }),
   deleteStudent: (id) => request(`/students/${id}`, { method: 'DELETE' }),
+  courses: () => request('/courses'),
+  myCourses: () => request('/courses/mine'),
+  createCourse: (course) => request('/courses', { method: 'POST', body: JSON.stringify(course) }),
+  updateCourse: (id, course) => request(`/courses/${id}`, { method: 'PUT', body: JSON.stringify(course) }),
+  deleteCourse: (id) => request(`/courses/${id}`, { method: 'DELETE' }),
+  courseProgress: (id) => request(`/courses/${id}/progress`),
+  courseActivities: (id) => request(`/courses/${id}/activities`),
+  logActivity: (id, entry) => request(`/courses/${id}/activities`, { method: 'POST', body: JSON.stringify(entry) }),
   sessions: () => request('/sessions'),
   createSession: (session) => request('/sessions', { method: 'POST', body: JSON.stringify(session) }),
   updateSession: (id, session) => request(`/sessions/${id}`, { method: 'PUT', body: JSON.stringify(session) }),

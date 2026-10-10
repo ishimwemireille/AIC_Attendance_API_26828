@@ -3,7 +3,9 @@ import { NavLink } from 'react-router-dom'
 
 const ITEMS = [
   { to: '/', label: 'Dashboard', end: true },
+  { to: '/my-course', label: 'My course', trainers: true },
   { to: '/mark', label: 'Mark attendance', writers: true },
+  { to: '/courses', label: 'Courses' },
   { to: '/students', label: 'Students' },
   { to: '/sessions', label: 'Sessions' },
   { to: '/reports', label: 'Reports' },
@@ -15,6 +17,7 @@ export default function Layout({ user, onSignOut, children }) {
   const [open, setOpen] = useState(false)
   const canWrite = user.roles.includes('ADMIN') || user.roles.includes('COHORT_LEADER')
   const isAdmin = user.roles.includes('ADMIN')
+  const isTrainer = user.roles.includes('TRAINER')
   const initials = user.fullName.split(' ').map((p) => p[0]).slice(0, 2).join('').toUpperCase()
 
   return (
@@ -31,7 +34,9 @@ export default function Layout({ user, onSignOut, children }) {
         </div>
 
         <nav className="nav">
-          {ITEMS.filter((item) => (!item.writers || canWrite) && (!item.admins || isAdmin)).map((item) => (
+          {ITEMS.filter((item) => (!item.writers || canWrite)
+                        && (!item.admins || isAdmin)
+                        && (!item.trainers || isTrainer)).map((item) => (
             <NavLink key={item.to} to={item.to} end={item.end} onClick={() => setOpen(false)}>
               {item.label}
             </NavLink>

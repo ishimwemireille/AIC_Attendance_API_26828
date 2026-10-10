@@ -13,8 +13,8 @@ import java.time.LocalTime;
 import java.util.UUID;
 
 /**
- * The Class SessionRequest. What the client sends: the trainer is an id now,
- * not a name, because a trainer must be a real user for FR-6 to be enforceable.
+ * The Class SessionRequest. A session is scheduled inside a course, so the
+ * client sends the course it belongs to; the trainer follows from that.
  *
  * @author Ishimwe Mireille
  * @version 1.0
@@ -43,8 +43,8 @@ public class SessionRequest {
     @Size(min = 1, max = 20, message = "Room must be between 1 and 20 characters")
     private String room;
 
-    @NotNull(message = "trainerId is required")
-    private UUID trainerId;
+    @NotNull(message = "courseId is required")
+    private UUID courseId;
 
     @Min(value = 1, message = "Capacity must be at least 1")
     private int capacity;

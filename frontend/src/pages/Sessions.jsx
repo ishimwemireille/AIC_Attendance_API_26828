@@ -3,12 +3,12 @@ import { api } from '../api'
 
 const BLANK = {
   title: '', sessionDate: '', startTime: '08:00', endTime: '10:00',
-  room: '', trainerId: '', capacity: 40, active: true,
+  room: '', courseId: '', capacity: 40, active: true,
 }
 
 export default function Sessions({ user }) {
   const [sessions, setSessions] = useState(null)
-  const [trainers, setTrainers] = useState([])
+  const [courses, setCourses] = useState([])
   const [form, setForm] = useState(BLANK)
   const [editing, setEditing] = useState(null)
   const [showForm, setShowForm] = useState(false)
@@ -24,7 +24,7 @@ export default function Sessions({ user }) {
 
   useEffect(() => {
     load()
-    if (canWrite) api.trainers().then(setTrainers).catch(() => setTrainers([]))
+    api.courses().then(setCourses).catch(() => setCourses([]))
   }, [])
 
   function startEdit(session) {
@@ -35,7 +35,7 @@ export default function Sessions({ user }) {
       startTime: session.startTime,
       endTime: session.endTime,
       room: session.room,
-      trainerId: session.trainer?.id || '',
+      courseId: session.course?.id || '',
       capacity: session.capacity,
       active: session.active,
     })
@@ -122,15 +122,19 @@ export default function Sessions({ user }) {
                 <span className="hint">Must be after the start time.</span>
               </div>
               <div className="field">
-                <label htmlFor="trainer">Trainer</label>
-                <select id="trainer" value={form.trainerId} required
-                        onChange={(e) => setForm({ ...form, trainerId: e.target.value })}>
-                  <option value="">Choose a trainer…</option>
-                  {trainers.map((t) => (
-                    <option key={t.id} value={t.id}>{t.fullName}</option>
+                <label htmlFor="course">Course</label>
+                <select id="course" value={form.courseId} required
+                        onChange={(e) => setForm({ ...form, courseId: e.target.value })}>
+                  <option value="">Choose a course…</option>
+                  {courses.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.sequence}. {c.title} ({c.startDate} to {c.endDate})
+                    </option>
                   ))}
                 </select>
-                <span className="hint">Only users holding the TRAINER role appear.</span>
+                <span className="hint">
+                  The trainer comes from the course, and the date must fall inside it.
+                </span>
               </div>
               <div className="field">
                 <label htmlFor="capacity">Capacity</label>
@@ -165,7 +169,8 @@ export default function Sessions({ user }) {
                       <td data-label="Date" className="num">{s.sessionDate}</td>
                       <td data-label="Time" className="num">{s.startTime} – {s.endTime}</td>
                       <td data-label="Room">{s.room}</td>
-                      <td data-label="Trainer">{s.trainer?.fullName || '—'}</td>
+                      <td data-label="Course">{s.course?.title || '—'}</td>
+                      <td data-label="Trainer">{s.course?.trainer?.fullName || '—'}</td>
                       <td data-label="Seats" className="num">{s.capacity}</td>
                       {canWrite && (
                         <td data-label="Actions">

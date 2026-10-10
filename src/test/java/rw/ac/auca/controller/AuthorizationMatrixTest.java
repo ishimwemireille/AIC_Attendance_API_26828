@@ -9,6 +9,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -18,10 +19,13 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import rw.ac.auca.attendance.service.AttendanceService;
 import rw.ac.auca.audit.repository.AuditEntryRepository;
+import rw.ac.auca.course.service.CourseProgressService;
+import rw.ac.auca.course.service.CourseService;
 import rw.ac.auca.audit.service.AuditService;
 import rw.ac.auca.config.SecurityConfig;
 import rw.ac.auca.notification.repository.NotificationLogRepository;
 import rw.ac.auca.session.service.SessionService;
+import rw.ac.auca.student.service.StudentImportService;
 import rw.ac.auca.student.service.StudentService;
 import rw.ac.auca.user.service.AucaOidcUserService;
 import rw.ac.auca.user.service.CurrentUserService;
@@ -31,6 +35,7 @@ import java.util.UUID;
 
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -80,7 +85,10 @@ class AuthorizationMatrixTest {
     }
 
     @MockitoBean private StudentService studentService;
+    @MockitoBean private StudentImportService studentImportService;
     @MockitoBean private SessionService sessionService;
+    @MockitoBean private CourseService courseService;
+    @MockitoBean private CourseProgressService courseProgressService;
     @MockitoBean private AttendanceService attendanceService;
     @MockitoBean private UserService userService;
     @MockitoBean private CurrentUserService currentUserService;
@@ -146,6 +154,17 @@ class AuthorizationMatrixTest {
 
     @Test
     @WithMockUser(roles = "TRAINER")
+    @DisplayName("a trainer may not import a spreadsheet of students")
+    void trainerMayNotImportStudents() throws Exception {
+        mockMvc.perform(multipart("/api/students/import")
+                        .file(new MockMultipartFile("file", "students.xlsx",
+                                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                new byte[]{1, 2, 3})))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(roles = "TRAINER")
     @DisplayName("a trainer may not mark attendance")
     void trainerMayNotMarkAttendance() throws Exception {
         String body = """
@@ -161,8 +180,8 @@ class AuthorizationMatrixTest {
     @DisplayName("a trainer may not schedule a session")
     void trainerMayNotScheduleASession() throws Exception {
         String body = """
-                {"title":"Web Technology","sessionDate":"2026-10-10","startTime":"08:00",
-                 "endTime":"10:00","room":"Lab 204","trainerId":"%s","capacity":40}"""
+                {"title":"Week 3","sessionDate":"2026-10-10","startTime":"08:00",
+                 "endTime":"10:00","room":"Lab 204","courseId":"%s","capacity":40}"""
                 .formatted(UUID.randomUUID());
         mockMvc.perform(post("/api/sessions")
                         .contentType(MediaType.APPLICATION_JSON).content(body))
@@ -176,6 +195,39 @@ class AuthorizationMatrixTest {
     @DisplayName("a trainer may read sessions; the narrowing to their own happens in the service")
     void trainerMayReadSessions() throws Exception {
         mockMvc.perform(get("/api/sessions")).andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(roles = "TRAINER")
+    @DisplayName("a trainer may read courses; the narrowing to their own happens in the service")
+    void trainerMayReadCourses() throws Exception {
+        mockMvc.perform(get("/api/courses")).andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(roles = "TRAINER")
+    @DisplayName("a trainer may not create a course")
+    void trainerMayNotCreateACourse() throws Exception {
+        String body = """
+                {"code":"WEBTECH","title":"Web Technology","sequence":1,
+                 "startDate":"2026-10-01","endDate":"2026-10-31","trainerId":"%s"}"""
+                .formatted(UUID.randomUUID());
+        mockMvc.perform(post("/api/courses")
+                        .contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(roles = "COHORT_LEADER")
+    @DisplayName("a cohort leader may create a course")
+    void cohortLeaderMayCreateACourse() throws Exception {
+        String body = """
+                {"code":"WEBTECH","title":"Web Technology","sequence":1,
+                 "startDate":"2026-10-01","endDate":"2026-10-31","trainerId":"%s"}"""
+                .formatted(UUID.randomUUID());
+        mockMvc.perform(post("/api/courses")
+                        .contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isCreated());
     }
 
     @Test
