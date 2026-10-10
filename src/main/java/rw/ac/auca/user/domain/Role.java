@@ -8,7 +8,8 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.Check;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import rw.ac.auca.base.BaseEntity;
 
 /**
@@ -21,12 +22,12 @@ import rw.ac.auca.base.BaseEntity;
 @Setter
 @Entity
 @Table(name = "roles")
-@Check(constraints = "name IN ('COHORT_LEADER', 'TRAINER', 'ADMIN')")
 public class Role extends BaseEntity {
 
     @NotNull(message = "Role name is required")
     @Enumerated(EnumType.STRING)
     @Column(name = "name", nullable = false, unique = true, length = 20)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     private RoleName name;
 
     public Role() {

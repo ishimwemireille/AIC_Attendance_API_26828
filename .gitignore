@@ -3,3 +3,6 @@ target/
 *.iml
 .DS_Store
 app.log
+
+# Local OAuth2 credentials - never committed
+.env.local
