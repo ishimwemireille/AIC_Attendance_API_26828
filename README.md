@@ -165,3 +165,30 @@ Seeded accounts (`app.seed-demo-data=true`):
 The MongoDB property prefix changed from `spring.data.mongodb` to
 `spring.mongodb`. The old name is ignored silently, so writes land in Mongo's
 default `test` database instead of failing.
+
+## Running the tests
+
+```bash
+mvn test
+```
+
+37 tests, in four groups:
+
+| Group | Needs | Covers |
+|---|---|---|
+| `AttendanceServiceImplTest` | nothing | the attendance business rules, with mocks |
+| `AuthorizationMatrixTest` | nothing | who may call which endpoint, as a web slice |
+| `AttendanceEventPublisherTest` | nothing | that a broker outage cannot fail an attendance write |
+| `DatabaseConstraintsTest` | PostgreSQL | that the UNIQUE constraints really refuse duplicates |
+
+The constraint tests run against a real PostgreSQL database, `aicattendance_test`,
+which is recreated on every run. Create it once:
+
+```bash
+createdb -h localhost -U postgres aicattendance_test
+```
+
+They deliberately do not use an embedded database. A constraint is a property of
+the database engine, so checking it on a different one tests the wrong thing —
+H2 demonstrated exactly that by rejecting a value against a generated enum check
+that PostgreSQL accepts.

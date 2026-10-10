@@ -14,7 +14,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.Check;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import rw.ac.auca.base.BaseEntity;
 import rw.ac.auca.session.domain.Session;
 import rw.ac.auca.student.domain.Student;
@@ -34,7 +35,6 @@ import java.time.LocalTime;
 @Table(name = "attendances",
         uniqueConstraints = @UniqueConstraint(name = "uk_student_session",
                 columnNames = {"student_id", "session_id"}))
-@Check(constraints = "status IN ('PRESENT', 'LATE', 'ABSENT', 'EXCUSED')")
 public class Attendance extends BaseEntity {
 
     @NotNull(message = "Student is required")
@@ -59,6 +59,7 @@ public class Attendance extends BaseEntity {
     @NotNull(message = "Status is required")
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 10)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     private AttendanceStatus status;
 
     @Size(max = 150, message = "Remarks cannot be longer than 150 characters")
