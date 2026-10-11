@@ -62,7 +62,7 @@ export default function Login({ onSignedIn }) {
                    onChange={(e) => setEmail(e.target.value)} />
           </div>
           <div className="field">
-            <label htmlFor="password">Development password</label>
+            <label htmlFor="password">Password</label>
             <input id="password" type="password" value={password} required
                    onChange={(e) => setPassword(e.target.value)} />
           </div>

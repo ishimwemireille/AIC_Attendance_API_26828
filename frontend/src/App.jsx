@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
-import { api, clearAuth, hasAuth } from './api'
+import { api, clearAuth } from './api'
 import Layout from './components/Layout'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
@@ -19,10 +19,9 @@ export default function App() {
   const [checking, setChecking] = useState(true)
 
   useEffect(() => {
-    if (!hasAuth()) {
-      setChecking(false)
-      return
-    }
+    // Always ask. After signing in with Google there is nothing in session
+    // storage - the session is a cookie - so checking hasAuth() first would
+    // send a perfectly good Google session straight back to the login page.
     api.me()
       .then(setUser)
       .catch(() => clearAuth())
