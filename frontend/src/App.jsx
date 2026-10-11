@@ -12,6 +12,7 @@ import Reports from './pages/Reports'
 import Users from './pages/Users'
 import Courses from './pages/Courses'
 import MyCourse from './pages/MyCourse'
+import System from './pages/System'
 
 export default function App() {
   const [user, setUser] = useState(null)
@@ -57,6 +58,7 @@ export default function App() {
         <Route path="/my-course" element={<MyCourse />} />
         <Route path="/reports" element={<Reports />} />
         <Route path="/users" element={<Users />} />
+        <Route path="/system" element={<System />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Layout>

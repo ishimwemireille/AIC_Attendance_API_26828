@@ -26,6 +26,7 @@ import rw.ac.auca.config.SecurityConfig;
 import rw.ac.auca.notification.repository.NotificationLogRepository;
 import rw.ac.auca.session.service.SessionService;
 import rw.ac.auca.student.service.StudentService;
+import rw.ac.auca.system.service.SystemHealthService;
 import rw.ac.auca.user.service.AucaOidcUserService;
 import rw.ac.auca.user.service.CurrentUserService;
 import rw.ac.auca.user.service.UserService;
@@ -95,6 +96,7 @@ class AuthorizationMatrixTest {
     @MockitoBean private AuditEntryRepository auditEntryRepository;
     @MockitoBean private NotificationLogRepository notificationLogRepository;
     @MockitoBean private AucaOidcUserService aucaOidcUserService;
+    @MockitoBean private SystemHealthService systemHealthService;
 
     // ------------------------------------------------------- no credentials
 
@@ -248,5 +250,43 @@ class AuthorizationMatrixTest {
     @DisplayName("a trainer may not read the notification log")
     void trainerMayNotReadNotifications() throws Exception {
         mockMvc.perform(get("/api/notifications")).andExpect(status().isForbidden());
+    }
+
+    // ------------------------------------------------- the technical screens
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    @DisplayName("an administrator may see the state of the stores")
+    void adminMaySeeTheStores() throws Exception {
+        mockMvc.perform(get("/api/system/stores")).andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(roles = "COHORT_LEADER")
+    @DisplayName("a cohort leader may not see the state of the stores")
+    void cohortLeaderMayNotSeeTheStores() throws Exception {
+        mockMvc.perform(get("/api/system/stores")).andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    @DisplayName("an administrator may read the outbox")
+    void adminMayReadTheOutbox() throws Exception {
+        mockMvc.perform(get("/api/system/outbox")).andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(roles = "TRAINER")
+    @DisplayName("a trainer may not read the outbox")
+    void trainerMayNotReadTheOutbox() throws Exception {
+        mockMvc.perform(get("/api/system/outbox")).andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(roles = "COHORT_LEADER")
+    @DisplayName("a cohort leader may not send a stuck alert again")
+    void cohortLeaderMayNotRetryAnAlert() throws Exception {
+        mockMvc.perform(post("/api/system/outbox/" + UUID.randomUUID() + "/retry"))
+                .andExpect(status().isForbidden());
     }
 }

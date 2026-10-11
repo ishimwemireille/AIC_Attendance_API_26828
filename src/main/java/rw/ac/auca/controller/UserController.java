@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import rw.ac.auca.course.service.CourseService;
 import rw.ac.auca.user.domain.RoleName;
 import rw.ac.auca.user.domain.User;
 import rw.ac.auca.user.service.CurrentUserService;
@@ -38,6 +40,9 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private CourseService courseService;
 
     @Autowired
     private CurrentUserService currentUserService;
@@ -79,8 +84,17 @@ public class UserController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
     public User createUser(@Valid @RequestBody UserRequest request) {
-        return userService.createUser(request.getEmail(), request.getFullName(), request.getRoles());
+        User created = userService.createUser(
+                request.getEmail(), request.getFullName(), request.getRoles());
+
+        // A trainer with no course has nothing to open, so the course can be
+        // named here. The course service still checks the role and the account.
+        if (request.getCourseId() != null) {
+            courseService.assignTrainer(request.getCourseId(), created.getId());
+        }
+        return created;
     }
 
     @PutMapping("/{id}/roles")

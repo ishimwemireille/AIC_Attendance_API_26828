@@ -103,6 +103,33 @@ public class CourseServiceImpl implements CourseService {
         course.setActive(request.isActive());
     }
 
+    /**
+     * Hands a course to a trainer without touching its dates. Granting someone
+     * the TRAINER role does not by itself give them anything to look at, so an
+     * administrator can name their course at the moment access is granted.
+     */
+    @Override
+    public Course assignTrainer(UUID courseId, UUID trainerId) {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "No course found with id " + courseId));
+
+        User trainer = userService.findUserById(trainerId);
+        if (!trainer.hasRole(RoleName.TRAINER)) {
+            throw new BusinessRuleException(trainer.getFullName()
+                    + " cannot lead a course because they do not hold the TRAINER role.");
+        }
+        if (!trainer.isActive()) {
+            throw new BusinessRuleException(trainer.getFullName()
+                    + " is not an active user and cannot lead a course.");
+        }
+
+        course.setTrainer(trainer);
+        Course saved = courseRepository.save(course);
+        auditService.record("Course", saved.getId(), AuditService.UPDATE, null, saved);
+        return saved;
+    }
+
     @Override
     public void deleteCourse(UUID id) {
         Course found = findCourseById(id);

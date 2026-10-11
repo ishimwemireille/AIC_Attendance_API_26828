@@ -11,6 +11,7 @@ const ITEMS = [
   { to: '/reports', label: 'Reports' },
   { to: '/notifications', label: 'Notifications', writers: true },
   { to: '/users', label: 'Access', admins: true },
+  { to: '/system', label: 'System', admins: true },
 ]
 
 export default function Layout({ user, onSignOut, children }) {

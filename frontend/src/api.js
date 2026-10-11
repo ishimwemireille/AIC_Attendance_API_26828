@@ -107,4 +107,8 @@ export const api = {
   attendanceBySession: (id) => request(`/attendances/session/${id}`),
   mark: (record) => request('/attendances', { method: 'POST', body: JSON.stringify(record) }),
   notifications: () => request('/notifications'),
+  audit: (limit = 50) => request(`/audit?limit=${limit}`),
+  systemStores: () => request('/system/stores'),
+  systemOutbox: () => request('/system/outbox'),
+  retryOutbox: (id) => request(`/system/outbox/${id}/retry`, { method: 'POST' }),
 }

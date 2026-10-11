@@ -24,4 +24,6 @@ public interface CourseService {
     List<Course> findAllCourses();
 
     List<Course> findByTrainer(UUID trainerId);
+
+    Course assignTrainer(UUID courseId, UUID trainerId);
 }
