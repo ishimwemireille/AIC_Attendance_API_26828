@@ -1,10 +1,28 @@
 import { useState } from 'react'
 import { api, saveAuth, clearAuth } from '../api'
 
+// What the API sends back when Google vouched for someone the system will
+// not let in. Google accepted the password; the refusal is ours, so saying
+// "invalid credentials" would be a lie.
+const REFUSALS = {
+  invalid_domain: 'That Google account is not an AUCA address. Sign in with your @auca.ac.rw account.',
+  no_access: 'That account has not been granted access yet. Ask an administrator to add it on the Access screen.',
+  inactive: 'That account has been deactivated. Ask an administrator to reactivate it.',
+  failed: 'Signing in with Google did not complete. Try again.',
+}
+
+function refusalFromUrl() {
+  const code = new URLSearchParams(window.location.search).get('error')
+  if (!code) return null
+  // Keep the address bar clean once the message has been read off it.
+  window.history.replaceState({}, '', window.location.pathname)
+  return REFUSALS[code] || REFUSALS.failed
+}
+
 export default function Login({ onSignedIn }) {
   const [email, setEmail] = useState('cohort.leader@auca.ac.rw')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState(null)
+  const [error, setError] = useState(refusalFromUrl)
   const [busy, setBusy] = useState(false)
 
   async function submit(event) {

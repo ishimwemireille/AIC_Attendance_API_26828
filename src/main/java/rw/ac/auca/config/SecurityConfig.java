@@ -20,6 +20,14 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import rw.ac.auca.user.service.AucaOidcUserService;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
@@ -71,7 +79,8 @@ public class SecurityConfig {
         if (clientRegistrations.getIfAvailable() != null) {
             http.oauth2Login(login -> login
                     .userInfoEndpoint(userInfo -> userInfo.oidcUserService(oidcUserService))
-                    .defaultSuccessUrl(frontendUrl, true));
+                    .defaultSuccessUrl(frontendUrl, true)
+                    .failureHandler(this::sendBackWithTheReason));
         }
 
         // Development convenience only. See DevUserDetailsService.
@@ -80,6 +89,22 @@ public class SecurityConfig {
         }
 
         return http.build();
+    }
+
+    /**
+     * AucaOidcUserService refuses a sign-in for one of three reasons, each with
+     * its own code. Spring's own failure page calls all of them "Invalid
+     * credentials", which is both wrong and unhelpful: the credentials were
+     * accepted by Google. The code is carried back to the sign-in screen so the
+     * person is told what actually happened.
+     */
+    private void sendBackWithTheReason(HttpServletRequest request, HttpServletResponse response,
+                                       AuthenticationException failure) throws IOException {
+        String code = failure instanceof OAuth2AuthenticationException oauth2Failure
+                ? oauth2Failure.getError().getErrorCode() : "failed";
+
+        response.sendRedirect(frontendUrl + (frontendUrl.contains("?") ? "&" : "?")
+                + "error=" + URLEncoder.encode(code, StandardCharsets.UTF_8));
     }
 
     @Bean
