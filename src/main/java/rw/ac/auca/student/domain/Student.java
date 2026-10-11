@@ -2,6 +2,7 @@ package rw.ac.auca.student.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -21,7 +22,10 @@ import rw.ac.auca.base.BaseEntity;
 @Getter
 @Setter
 @Entity
-@Table(name = "students")
+@Table(name = "students", indexes = {
+        @Index(name = "idx_students_area_group", columnList = "thematic_area, student_group"),
+        @Index(name = "idx_students_active", columnList = "active")
+})
 @Check(constraints = "LENGTH(first_name) >= 2 AND LENGTH(last_name) >= 2 "
         + "AND gender IN ('Male', 'Female')")
 public class Student extends BaseEntity {

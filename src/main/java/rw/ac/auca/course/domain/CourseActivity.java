@@ -2,6 +2,7 @@ package rw.ac.auca.course.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Index;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -28,7 +29,8 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @Entity
-@Table(name = "course_activities")
+@Table(name = "course_activities", indexes =
+        @Index(name = "idx_activity_course", columnList = "course_id, activity_date"))
 public class CourseActivity extends BaseEntity {
 
     @NotNull(message = "Course is required")

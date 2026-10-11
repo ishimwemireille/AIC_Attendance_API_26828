@@ -2,6 +2,7 @@ package rw.ac.auca.course.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Index;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -32,7 +33,10 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @Entity
-@Table(name = "courses")
+@Table(name = "courses", indexes = {
+        @Index(name = "idx_courses_trainer", columnList = "trainer_id"),
+        @Index(name = "idx_courses_dates", columnList = "start_date, end_date")
+})
 @Check(constraints = "end_date > start_date AND sequence_number >= 1")
 public class Course extends BaseEntity {
 

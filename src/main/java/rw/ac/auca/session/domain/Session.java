@@ -3,6 +3,7 @@ package rw.ac.auca.session.domain;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Index;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -34,6 +35,10 @@ import java.time.LocalTime;
 @Setter
 @Entity
 @Table(name = "sessions",
+        indexes = {
+                @Index(name = "idx_sessions_date", columnList = "session_date"),
+                @Index(name = "idx_sessions_course", columnList = "course_id, session_date")
+        },
         uniqueConstraints = @UniqueConstraint(name = "uk_session_date_time_room",
                 columnNames = {"session_date", "start_time", "room"}))
 @Check(constraints = "end_time > start_time AND capacity >= 1")
