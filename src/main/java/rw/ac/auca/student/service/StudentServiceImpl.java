@@ -80,7 +80,10 @@ public class StudentServiceImpl implements StudentService {
     }
 
     private void checkSharedRules(Student theStudent) {
-        if (!theStudent.getEmail().toLowerCase().endsWith("@auca.ac.rw")) {
+        // The register carries no email, so a student may have none. The rule
+        // applies to an address that was actually given.
+        if (hasText(theStudent.getEmail())
+                && !theStudent.getEmail().toLowerCase().endsWith("@auca.ac.rw")) {
             throw new BusinessRuleException("Email must be an AUCA email ending with @auca.ac.rw");
         }
         if (theStudent.getFirstName().equalsIgnoreCase(theStudent.getLastName())) {
