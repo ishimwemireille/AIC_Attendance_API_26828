@@ -3,7 +3,7 @@ import { api } from '../api'
 
 const BLANK = {
   regNumber: '', firstName: '', lastName: '', email: '', phone: '',
-  gender: 'Female', program: 'Information Technology', yearOfStudy: 1,
+  gender: 'Female', thematicArea: 'Health', studentGroup: 'GROUP A',
 }
 
 export default function Students({ user }) {
@@ -26,7 +26,7 @@ export default function Students({ user }) {
     event.preventDefault()
     setBusy(true); setError(null)
     try {
-      const body = { ...form, yearOfStudy: Number(form.yearOfStudy) }
+      const body = { ...form }
       if (editing) await api.updateStudent(editing, body)
       else await api.createStudent(body)
       setForm(BLANK); setEditing(null); setShowForm(false); load()
@@ -36,6 +36,7 @@ export default function Students({ user }) {
       setBusy(false)
     }
   }
+
 
   async function remove(student) {
     if (!window.confirm(`Remove ${student.firstName} ${student.lastName}?`)) return
@@ -47,14 +48,14 @@ export default function Students({ user }) {
     setForm({
       regNumber: student.regNumber, firstName: student.firstName, lastName: student.lastName,
       email: student.email, phone: student.phone, gender: student.gender,
-      program: student.program, yearOfStudy: student.yearOfStudy,
+      thematicArea: student.thematicArea, studentGroup: student.studentGroup || '',
     })
     setShowForm(true); setError(null)
   }
 
   const shown = (students || []).filter((s) => {
     const q = query.trim().toLowerCase()
-    return !q || `${s.firstName} ${s.lastName} ${s.regNumber} ${s.program}`.toLowerCase().includes(q)
+    return !q || `${s.firstName} ${s.lastName} ${s.regNumber} ${s.thematicArea} ${s.studentGroup || ''}`.toLowerCase().includes(q)
   })
 
   return (
@@ -77,6 +78,7 @@ export default function Students({ user }) {
       <div className="content">
         {error && <div className="banner error">{error}</div>}
 
+
         {showForm && canWrite && (
           <form className="card" onSubmit={save}>
             <h2 style={{ fontSize: 18, marginBottom: 14 }}>
@@ -85,13 +87,15 @@ export default function Students({ user }) {
             <div className="form-grid">
               <Field label="Registration number" value={form.regNumber} hint="Exactly 5 digits"
                      onChange={(v) => setForm({ ...form, regNumber: v })} />
-              <Field label="Email" type="email" value={form.email}
+              <Field label="Email" type="email" value={form.email} optional
+                     hint="Optional. Without one, no email alert is sent."
                      onChange={(v) => setForm({ ...form, email: v })} />
               <Field label="First name" value={form.firstName}
                      onChange={(v) => setForm({ ...form, firstName: v })} />
               <Field label="Last name" value={form.lastName}
                      onChange={(v) => setForm({ ...form, lastName: v })} />
-              <Field label="Phone" value={form.phone} hint="10 digits starting 07"
+              <Field label="Phone" value={form.phone} optional
+                     hint="Optional. 10 digits starting 07."
                      onChange={(v) => setForm({ ...form, phone: v })} />
               <div className="field">
                 <label htmlFor="gender">Gender</label>
@@ -101,20 +105,24 @@ export default function Students({ user }) {
                 </select>
               </div>
               <div className="field">
-                <label htmlFor="program">Program</label>
-                <select id="program" value={form.program}
-                        onChange={(e) => setForm({ ...form, program: e.target.value })}>
-                  <option>Information Technology</option>
-                  <option>Software Engineering</option>
-                  <option>Business IT</option>
+                <label htmlFor="sector">Thematic area</label>
+                <select id="sector" value={form.thematicArea}
+                        onChange={(e) => setForm({ ...form, thematicArea: e.target.value })}>
+                  <option>Agriculture</option>
+                  <option>Crime Prevention</option>
+                  <option>Education</option>
+                  <option>Fintech</option>
+                  <option>Health</option>
                 </select>
               </div>
               <div className="field">
-                <label htmlFor="year">Year of study</label>
-                <select id="year" value={form.yearOfStudy}
-                        onChange={(e) => setForm({ ...form, yearOfStudy: e.target.value })}>
-                  {[1, 2, 3, 4, 5].map((y) => <option key={y} value={y}>Year {y}</option>)}
+                <label htmlFor="group">Group</label>
+                <select id="group" value={form.studentGroup}
+                        onChange={(e) => setForm({ ...form, studentGroup: e.target.value })}>
+                  <option>GROUP A</option>
+                  <option>GROUP B</option>
                 </select>
+                <span className="hint">Both groups take the same course at the same time.</span>
               </div>
             </div>
             <button className="btn" type="submit" disabled={busy} style={{ marginTop: 16 }}>
@@ -125,7 +133,7 @@ export default function Students({ user }) {
 
         <div className="field" style={{ maxWidth: 420 }}>
           <label htmlFor="search">Search</label>
-          <input id="search" type="search" value={query} placeholder="Name, registration number or program"
+          <input id="search" type="search" value={query} placeholder="Name, registration number, thematic area or group"
                  onChange={(e) => setQuery(e.target.value)} />
         </div>
 
@@ -136,8 +144,8 @@ export default function Students({ user }) {
               <table className="table">
                 <thead>
                   <tr>
-                    <th>Reg no.</th><th>Student</th><th>Program</th>
-                    <th>Year</th><th>Phone</th><th>Status</th>{canWrite && <th></th>}
+                    <th>Reg no.</th><th>Student</th><th>Thematic area</th><th>Group</th>
+                    <th>Phone</th><th>Status</th>{canWrite && <th></th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -146,8 +154,12 @@ export default function Students({ user }) {
                       <td data-label="Reg no." className="num"><strong>{s.regNumber}</strong></td>
                       <td data-label="Student">{s.firstName} {s.lastName}<br />
                         <span className="stat-note">{s.email}</span></td>
-                      <td data-label="Program">{s.program}</td>
-                      <td data-label="Year" className="num">{s.yearOfStudy}</td>
+                      <td data-label="Thematic area">{s.thematicArea}</td>
+                      <td data-label="Group">
+                        {s.studentGroup
+                          ? <span className="pill muted">{s.studentGroup}</span>
+                          : <span className="stat-note">—</span>}
+                      </td>
                       <td data-label="Phone" className="num">{s.phone}</td>
                       <td data-label="Status">
                         <span className={s.active ? 'pill PRESENT' : 'pill muted'}>
@@ -175,12 +187,13 @@ export default function Students({ user }) {
   )
 }
 
-function Field({ label, value, onChange, type = 'text', hint }) {
+function Field({ label, value, onChange, type = 'text', hint, optional }) {
   const id = label.toLowerCase().replace(/\s+/g, '-')
   return (
     <div className="field">
       <label htmlFor={id}>{label}</label>
-      <input id={id} type={type} value={value} required onChange={(e) => onChange(e.target.value)} />
+      <input id={id} type={type} value={value} required={!optional}
+             onChange={(e) => onChange(e.target.value)} />
       {hint && <span className="hint">{hint}</span>}
     </div>
   )

@@ -3,6 +3,7 @@ package rw.ac.auca.attendance.domain;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Index;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
@@ -33,6 +34,10 @@ import java.time.LocalTime;
 @Setter
 @Entity
 @Table(name = "attendances",
+        indexes = {
+                @Index(name = "idx_attendance_session", columnList = "session_id"),
+                @Index(name = "idx_attendance_student_status", columnList = "student_id, status")
+        },
         uniqueConstraints = @UniqueConstraint(name = "uk_student_session",
                 columnNames = {"student_id", "session_id"}))
 public class Attendance extends BaseEntity {

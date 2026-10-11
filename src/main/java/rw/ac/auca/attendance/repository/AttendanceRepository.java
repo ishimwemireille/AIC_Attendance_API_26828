@@ -24,6 +24,8 @@ public interface AttendanceRepository extends JpaRepository<Attendance, UUID> {
             + "WHERE a.student.id = :studentId")
     List<Attendance> findByStudentId(@Param("studentId") UUID studentId);
 
+    List<Attendance> findBySessionCourseId(UUID courseId);
+
     boolean existsByStudentIdAndSessionId(UUID studentId, UUID sessionId);
 
     boolean existsByStudentIdAndSessionIdAndIdNot(UUID studentId, UUID sessionId, UUID id);

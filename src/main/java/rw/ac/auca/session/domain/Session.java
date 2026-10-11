@@ -3,6 +3,7 @@ package rw.ac.auca.session.domain;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Index;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -16,13 +17,16 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Check;
 import rw.ac.auca.base.BaseEntity;
-import rw.ac.auca.user.domain.User;
+import rw.ac.auca.course.domain.Course;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 /**
- * The Class Session.
+ * The Class Session. One sitting of a course.
+ *
+ * The trainer is not held here: it belongs to the course, so a session cannot
+ * disagree with the course it is part of about who teaches it.
  *
  * @author Ishimwe Mireille
  * @version 1.0
@@ -31,6 +35,10 @@ import java.time.LocalTime;
 @Setter
 @Entity
 @Table(name = "sessions",
+        indexes = {
+                @Index(name = "idx_sessions_date", columnList = "session_date"),
+                @Index(name = "idx_sessions_course", columnList = "course_id, session_date")
+        },
         uniqueConstraints = @UniqueConstraint(name = "uk_session_date_time_room",
                 columnNames = {"session_date", "start_time", "room"}))
 @Check(constraints = "end_time > start_time AND capacity >= 1")
@@ -61,10 +69,10 @@ public class Session extends BaseEntity {
     @Column(name = "room", nullable = false, length = 20)
     private String room;
 
-    @NotNull(message = "Trainer is required")
+    @NotNull(message = "Course is required")
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "trainer_id", nullable = false)
-    private User trainer;
+    @JoinColumn(name = "course_id", nullable = false)
+    private Course course;
 
     @Min(value = 1, message = "Capacity must be at least 1")
     @Column(name = "capacity", nullable = false)

@@ -9,6 +9,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -18,11 +19,14 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import rw.ac.auca.attendance.service.AttendanceService;
 import rw.ac.auca.audit.repository.AuditEntryRepository;
+import rw.ac.auca.course.service.CourseProgressService;
+import rw.ac.auca.course.service.CourseService;
 import rw.ac.auca.audit.service.AuditService;
 import rw.ac.auca.config.SecurityConfig;
 import rw.ac.auca.notification.repository.NotificationLogRepository;
 import rw.ac.auca.session.service.SessionService;
 import rw.ac.auca.student.service.StudentService;
+import rw.ac.auca.system.service.SystemHealthService;
 import rw.ac.auca.user.service.AucaOidcUserService;
 import rw.ac.auca.user.service.CurrentUserService;
 import rw.ac.auca.user.service.UserService;
@@ -31,6 +35,7 @@ import java.util.UUID;
 
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -61,7 +66,7 @@ class AuthorizationMatrixTest {
     private static final String STUDENT_JSON = """
             {"regNumber":"24011","firstName":"Aline","lastName":"Uwase",
              "email":"aline.24011@auca.ac.rw","phone":"0788123456","gender":"Female",
-             "program":"Information Technology","yearOfStudy":3}""";
+             "thematicArea":"Health"}""";
 
     @Autowired
     private WebApplicationContext context;
@@ -80,7 +85,10 @@ class AuthorizationMatrixTest {
     }
 
     @MockitoBean private StudentService studentService;
+    @MockitoBean private rw.ac.auca.register.RegisterImportService registerImportService;
     @MockitoBean private SessionService sessionService;
+    @MockitoBean private CourseService courseService;
+    @MockitoBean private CourseProgressService courseProgressService;
     @MockitoBean private AttendanceService attendanceService;
     @MockitoBean private UserService userService;
     @MockitoBean private CurrentUserService currentUserService;
@@ -88,6 +96,7 @@ class AuthorizationMatrixTest {
     @MockitoBean private AuditEntryRepository auditEntryRepository;
     @MockitoBean private NotificationLogRepository notificationLogRepository;
     @MockitoBean private AucaOidcUserService aucaOidcUserService;
+    @MockitoBean private SystemHealthService systemHealthService;
 
     // ------------------------------------------------------- no credentials
 
@@ -146,6 +155,17 @@ class AuthorizationMatrixTest {
 
     @Test
     @WithMockUser(roles = "TRAINER")
+    @DisplayName("a trainer may not import an attendance register")
+    void trainerMayNotImportARegister() throws Exception {
+        mockMvc.perform(multipart("/api/courses/" + UUID.randomUUID() + "/import")
+                        .file(new MockMultipartFile("file", "students.xlsx",
+                                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                new byte[]{1, 2, 3})))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(roles = "TRAINER")
     @DisplayName("a trainer may not mark attendance")
     void trainerMayNotMarkAttendance() throws Exception {
         String body = """
@@ -161,8 +181,8 @@ class AuthorizationMatrixTest {
     @DisplayName("a trainer may not schedule a session")
     void trainerMayNotScheduleASession() throws Exception {
         String body = """
-                {"title":"Web Technology","sessionDate":"2026-10-10","startTime":"08:00",
-                 "endTime":"10:00","room":"Lab 204","trainerId":"%s","capacity":40}"""
+                {"title":"Week 3","sessionDate":"2026-10-10","startTime":"08:00",
+                 "endTime":"10:00","room":"Lab 204","courseId":"%s","capacity":40}"""
                 .formatted(UUID.randomUUID());
         mockMvc.perform(post("/api/sessions")
                         .contentType(MediaType.APPLICATION_JSON).content(body))
@@ -176,6 +196,39 @@ class AuthorizationMatrixTest {
     @DisplayName("a trainer may read sessions; the narrowing to their own happens in the service")
     void trainerMayReadSessions() throws Exception {
         mockMvc.perform(get("/api/sessions")).andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(roles = "TRAINER")
+    @DisplayName("a trainer may read courses; the narrowing to their own happens in the service")
+    void trainerMayReadCourses() throws Exception {
+        mockMvc.perform(get("/api/courses")).andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(roles = "TRAINER")
+    @DisplayName("a trainer may not create a course")
+    void trainerMayNotCreateACourse() throws Exception {
+        String body = """
+                {"code":"WEBTECH","title":"Web Technology","sequence":1,
+                 "startDate":"2026-10-01","endDate":"2026-10-31","trainerId":"%s"}"""
+                .formatted(UUID.randomUUID());
+        mockMvc.perform(post("/api/courses")
+                        .contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(roles = "COHORT_LEADER")
+    @DisplayName("a cohort leader may create a course")
+    void cohortLeaderMayCreateACourse() throws Exception {
+        String body = """
+                {"code":"WEBTECH","title":"Web Technology","sequence":1,
+                 "startDate":"2026-10-01","endDate":"2026-10-31","trainerId":"%s"}"""
+                .formatted(UUID.randomUUID());
+        mockMvc.perform(post("/api/courses")
+                        .contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isCreated());
     }
 
     @Test
@@ -197,5 +250,43 @@ class AuthorizationMatrixTest {
     @DisplayName("a trainer may not read the notification log")
     void trainerMayNotReadNotifications() throws Exception {
         mockMvc.perform(get("/api/notifications")).andExpect(status().isForbidden());
+    }
+
+    // ------------------------------------------------- the technical screens
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    @DisplayName("an administrator may see the state of the stores")
+    void adminMaySeeTheStores() throws Exception {
+        mockMvc.perform(get("/api/system/stores")).andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(roles = "COHORT_LEADER")
+    @DisplayName("a cohort leader may not see the state of the stores")
+    void cohortLeaderMayNotSeeTheStores() throws Exception {
+        mockMvc.perform(get("/api/system/stores")).andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    @DisplayName("an administrator may read the outbox")
+    void adminMayReadTheOutbox() throws Exception {
+        mockMvc.perform(get("/api/system/outbox")).andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(roles = "TRAINER")
+    @DisplayName("a trainer may not read the outbox")
+    void trainerMayNotReadTheOutbox() throws Exception {
+        mockMvc.perform(get("/api/system/outbox")).andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(roles = "COHORT_LEADER")
+    @DisplayName("a cohort leader may not send a stuck alert again")
+    void cohortLeaderMayNotRetryAnAlert() throws Exception {
+        mockMvc.perform(post("/api/system/outbox/" + UUID.randomUUID() + "/retry"))
+                .andExpect(status().isForbidden());
     }
 }

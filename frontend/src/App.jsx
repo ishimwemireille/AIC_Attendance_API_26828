@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
-import { api, clearAuth, hasAuth } from './api'
+import { api, clearAuth } from './api'
 import Layout from './components/Layout'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
@@ -10,16 +10,18 @@ import MarkAttendance from './pages/MarkAttendance'
 import Notifications from './pages/Notifications'
 import Reports from './pages/Reports'
 import Users from './pages/Users'
+import Courses from './pages/Courses'
+import MyCourse from './pages/MyCourse'
+import System from './pages/System'
 
 export default function App() {
   const [user, setUser] = useState(null)
   const [checking, setChecking] = useState(true)
 
   useEffect(() => {
-    if (!hasAuth()) {
-      setChecking(false)
-      return
-    }
+    // Always ask. After signing in with Google there is nothing in session
+    // storage - the session is a cookie - so checking hasAuth() first would
+    // send a perfectly good Google session straight back to the login page.
     api.me()
       .then(setUser)
       .catch(() => clearAuth())
@@ -51,8 +53,11 @@ export default function App() {
         <Route path="/sessions" element={<Sessions user={user} />} />
         <Route path="/mark" element={<MarkAttendance user={user} />} />
         <Route path="/notifications" element={<Notifications />} />
+        <Route path="/courses" element={<Courses user={user} />} />
+        <Route path="/my-course" element={<MyCourse />} />
         <Route path="/reports" element={<Reports />} />
         <Route path="/users" element={<Users />} />
+        <Route path="/system" element={<System />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Layout>

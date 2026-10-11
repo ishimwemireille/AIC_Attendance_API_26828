@@ -11,6 +11,7 @@ import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.test.context.TestPropertySource;
 import rw.ac.auca.attendance.domain.Attendance;
 import rw.ac.auca.attendance.domain.AttendanceStatus;
+import rw.ac.auca.course.domain.Course;
 import rw.ac.auca.session.domain.Session;
 import rw.ac.auca.student.domain.Student;
 import rw.ac.auca.user.domain.Role;
@@ -59,6 +60,7 @@ class DatabaseConstraintsTest {
     private TestEntityManager entityManager;
 
     private User trainer;
+    private Course course;
 
     @BeforeEach
     void setUp() {
@@ -68,6 +70,15 @@ class DatabaseConstraintsTest {
         trainer.setFullName("Jean Nsengiyumva");
         trainer.getRoles().add(role);
         trainer = entityManager.persist(trainer);
+
+        course = new Course();
+        course.setCode("WEBTECH");
+        course.setTitle("Web Technology");
+        course.setSequence(1);
+        course.setStartDate(LocalDate.of(2026, 10, 1));
+        course.setEndDate(LocalDate.of(2026, 10, 31));
+        course.setTrainer(trainer);
+        course = entityManager.persist(course);
     }
 
     private Student student(String regNumber, String email) {
@@ -78,8 +89,8 @@ class DatabaseConstraintsTest {
         student.setEmail(email);
         student.setPhone("0788123456");
         student.setGender("Female");
-        student.setProgram("Information Technology");
-        student.setYearOfStudy(3);
+        student.setThematicArea("Health");
+        student.setStudentGroup("GROUP A");
         student.setActive(true);
         return student;
     }
@@ -91,7 +102,7 @@ class DatabaseConstraintsTest {
         session.setStartTime(start);
         session.setEndTime(start.plusHours(2));
         session.setRoom(room);
-        session.setTrainer(trainer);
+        session.setCourse(course);
         session.setCapacity(40);
         session.setActive(true);
         return session;

@@ -10,10 +10,10 @@ import rw.ac.auca.exception.BusinessRuleException;
 import rw.ac.auca.exception.ResourceNotFoundException;
 import rw.ac.auca.session.domain.Session;
 import rw.ac.auca.session.repository.SessionRepository;
-import rw.ac.auca.user.domain.RoleName;
+import rw.ac.auca.course.domain.Course;
+import rw.ac.auca.course.service.CourseService;
 import rw.ac.auca.user.domain.User;
 import rw.ac.auca.user.service.CurrentUserService;
-import rw.ac.auca.user.service.UserService;
 
 import java.util.List;
 import java.util.UUID;
@@ -38,7 +38,7 @@ public class SessionServiceImpl implements SessionService {
     private AttendanceRepository attendanceRepository;
 
     @Autowired
-    private UserService userService;
+    private CourseService courseService;
 
     @Autowired
     private CurrentUserService currentUserService;
@@ -85,21 +85,25 @@ public class SessionServiceImpl implements SessionService {
     }
 
     private void apply(Session session, SessionRequest request) {
-        User trainer = userService.findUserById(request.getTrainerId());
-        if (!trainer.hasRole(RoleName.TRAINER)) {
-            throw new BusinessRuleException(trainer.getFullName()
-                    + " cannot be assigned as a trainer because they do not hold the TRAINER role.");
+        Course course = courseService.findCourseById(request.getCourseId());
+
+        if (!course.isActive()) {
+            throw new BusinessRuleException("\"" + course.getTitle()
+                    + "\" is not an active course, so no session can be scheduled in it.");
         }
-        if (!trainer.isActive()) {
-            throw new BusinessRuleException(trainer.getFullName()
-                    + " is not an active user and cannot be assigned as a trainer.");
+        if (request.getSessionDate().isBefore(course.getStartDate())
+                || request.getSessionDate().isAfter(course.getEndDate())) {
+            throw new BusinessRuleException("A session on " + request.getSessionDate()
+                    + " falls outside \"" + course.getTitle() + "\", which runs from "
+                    + course.getStartDate() + " to " + course.getEndDate() + ".");
         }
+
         session.setTitle(request.getTitle());
         session.setSessionDate(request.getSessionDate());
         session.setStartTime(request.getStartTime());
         session.setEndTime(request.getEndTime());
         session.setRoom(request.getRoom());
-        session.setTrainer(trainer);
+        session.setCourse(course);
         session.setCapacity(request.getCapacity());
         session.setActive(request.isActive());
     }
@@ -144,7 +148,7 @@ public class SessionServiceImpl implements SessionService {
     @Override
     @Transactional(readOnly = true)
     public List<Session> findByTrainer(UUID trainerId) {
-        return sessionRepository.findByTrainerIdOrderBySessionDateDescStartTimeAsc(trainerId);
+        return sessionRepository.findByCourseTrainerIdOrderBySessionDateDescStartTimeAsc(trainerId);
     }
 
     /** Throws when a trainer-only caller asks for a session that is not theirs. */
@@ -153,9 +157,9 @@ public class SessionServiceImpl implements SessionService {
             return;
         }
         User caller = currentUserService.require();
-        if (!session.getTrainer().getId().equals(caller.getId())) {
+        if (!session.getCourse().getTrainer().getId().equals(caller.getId())) {
             throw new AccessDeniedException(
-                    "You may only view sessions you teach.");
+                    "You may only view sessions on courses you lead.");
         }
     }
 }

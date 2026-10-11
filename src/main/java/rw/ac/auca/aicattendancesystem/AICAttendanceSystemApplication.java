@@ -27,7 +27,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
         "rw.ac.auca.session.repository",
         "rw.ac.auca.attendance.repository",
         "rw.ac.auca.user.repository",
-        "rw.ac.auca.outbox.repository"
+        "rw.ac.auca.outbox.repository",
+        "rw.ac.auca.course.repository"
 })
 @EnableMongoRepositories(basePackages = {
         "rw.ac.auca.notification.repository",

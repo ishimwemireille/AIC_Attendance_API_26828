@@ -173,7 +173,7 @@ public class AttendanceServiceImpl implements AttendanceService {
         if (currentUserService.isTrainerOnly()) {
             UUID trainerId = currentUserService.require().getId();
             return all.stream()
-                    .filter(record -> record.getSession().getTrainer().getId().equals(trainerId))
+                    .filter(record -> record.getSession().getCourse().getTrainer().getId().equals(trainerId))
                     .toList();
         }
         return all;

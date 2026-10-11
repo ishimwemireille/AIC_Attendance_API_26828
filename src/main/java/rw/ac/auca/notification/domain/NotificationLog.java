@@ -3,6 +3,8 @@ package rw.ac.auca.notification.domain;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.index.IndexDirection;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -25,6 +27,10 @@ import java.util.Map;
 @Getter
 @Setter
 @Document(collection = "notification_log")
+// The two ways this collection is read: the failed-delivery list, and the
+// whole log newest first. The first index cannot serve the second, because
+// that query does not filter on status.
+@CompoundIndex(name = "idx_status_recent", def = "{'status': 1, 'createdAt': -1}")
 public class NotificationLog {
 
     @Id
@@ -53,5 +59,6 @@ public class NotificationLog {
 
     private NotificationStatus status = NotificationStatus.PENDING;
 
+    @Indexed(direction = IndexDirection.DESCENDING)
     private LocalDateTime createdAt = LocalDateTime.now();
 }

@@ -2,10 +2,11 @@ import { useEffect, useState } from 'react'
 import { api } from '../api'
 
 const ROLES = ['ADMIN', 'COHORT_LEADER', 'TRAINER']
-const BLANK = { email: '', fullName: '', roles: ['TRAINER'] }
+const BLANK = { email: '', fullName: '', roles: ['TRAINER'], courseId: '' }
 
 export default function Users() {
   const [users, setUsers] = useState(null)
+  const [courses, setCourses] = useState([])
   const [form, setForm] = useState(BLANK)
   const [showForm, setShowForm] = useState(false)
   const [error, setError] = useState(null)
@@ -13,6 +14,7 @@ export default function Users() {
 
   function load() {
     api.users().then(setUsers).catch((p) => setError(p.message))
+    api.courses().then(setCourses).catch(() => setCourses([]))
   }
   useEffect(load, [])
 
@@ -29,13 +31,17 @@ export default function Users() {
     event.preventDefault()
     setBusy(true); setError(null)
     try {
-      await api.createUser(form)
+      await api.createUser({ ...form, courseId: form.courseId || null })
       setForm(BLANK); setShowForm(false); load()
     } catch (problem) {
       setError(problem.message)
     } finally {
       setBusy(false)
     }
+  }
+
+  function leadsOf(user) {
+    return courses.filter((course) => course.trainer?.id === user.id)
   }
 
   async function setActive(user, value) {
@@ -59,7 +65,11 @@ export default function Users() {
 
         {showForm && (
           <form className="card" onSubmit={save}>
-            <h2 style={{ fontSize: 18, marginBottom: 14 }}>Grant access</h2>
+            <h2 style={{ fontSize: 18, marginBottom: 6 }}>Grant access</h2>
+            <p className="hint" style={{ display: 'block', marginBottom: 14 }}>
+              No password is set here. The person signs in with the Google account
+              behind this address, so the system never holds a password of its own.
+            </p>
             <div className="form-grid">
               <div className="field">
                 <label htmlFor="email">AUCA email</label>
@@ -94,6 +104,26 @@ export default function Users() {
               </span>
             </fieldset>
 
+            {form.roles.includes('TRAINER') && (
+              <div className="field" style={{ marginTop: 14 }}>
+                <label htmlFor="courseId">Course to lead</label>
+                <select id="courseId" value={form.courseId}
+                        onChange={(e) => setForm({ ...form, courseId: e.target.value })}>
+                  <option value="">Decide later</option>
+                  {courses.map((course) => (
+                    <option key={course.id} value={course.id}>
+                      {course.sequence}. {course.title}
+                      {course.trainer ? ` — currently ${course.trainer.fullName}` : ''}
+                    </option>
+                  ))}
+                </select>
+                <span className="hint">
+                  A trainer with no course signs in to an empty screen. Choosing one here
+                  hands it over straight away; it can also be changed on the Courses page.
+                </span>
+              </div>
+            )}
+
             <button className="btn" type="submit" disabled={busy || form.roles.length === 0}
                     style={{ marginTop: 16 }}>
               {busy ? 'Saving…' : 'Grant access'}
@@ -105,7 +135,7 @@ export default function Users() {
           {!users ? <p className="empty">Loading…</p> : (
             <table className="table">
               <thead>
-                <tr><th>Name</th><th>Email</th><th>Roles</th><th>Status</th><th></th></tr>
+                <tr><th>Name</th><th>Email</th><th>Roles</th><th>Leads</th><th>Status</th><th></th></tr>
               </thead>
               <tbody>
                 {users.map((u) => (
@@ -120,6 +150,15 @@ export default function Users() {
                           </span>
                         ))}
                       </div>
+                    </td>
+                    <td data-label="Leads">
+                      {leadsOf(u).length === 0
+                        ? <span className="stat-note">—</span>
+                        : <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                            {leadsOf(u).map((c) => (
+                              <span key={c.id} className="pill muted">{c.title}</span>
+                            ))}
+                          </div>}
                     </td>
                     <td data-label="Status">
                       <span className={u.active ? 'pill PRESENT' : 'pill muted'}>

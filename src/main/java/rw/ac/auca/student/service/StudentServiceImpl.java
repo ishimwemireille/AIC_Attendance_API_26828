@@ -38,7 +38,8 @@ public class StudentServiceImpl implements StudentService {
             throw new BusinessRuleException("Registration number "
                     + theStudent.getRegNumber() + " is already used by another student.");
         }
-        if (studentRepository.existsByEmailIgnoreCase(theStudent.getEmail())) {
+        if (hasText(theStudent.getEmail())
+                && studentRepository.existsByEmailIgnoreCase(theStudent.getEmail())) {
             throw new BusinessRuleException("Email "
                     + theStudent.getEmail() + " is already used by another student.");
         }
@@ -57,7 +58,8 @@ public class StudentServiceImpl implements StudentService {
             throw new BusinessRuleException("Registration number "
                     + theStudent.getRegNumber() + " is already used by another student.");
         }
-        if (studentRepository.existsByEmailIgnoreCaseAndIdNot(theStudent.getEmail(), id)) {
+        if (hasText(theStudent.getEmail())
+                && studentRepository.existsByEmailIgnoreCaseAndIdNot(theStudent.getEmail(), id)) {
             throw new BusinessRuleException("Email "
                     + theStudent.getEmail() + " is already used by another student.");
         }
@@ -69,8 +71,8 @@ public class StudentServiceImpl implements StudentService {
         found.setEmail(theStudent.getEmail());
         found.setPhone(theStudent.getPhone());
         found.setGender(theStudent.getGender());
-        found.setProgram(theStudent.getProgram());
-        found.setYearOfStudy(theStudent.getYearOfStudy());
+        found.setThematicArea(theStudent.getThematicArea());
+        found.setStudentGroup(theStudent.getStudentGroup());
         found.setActive(theStudent.isActive());
         Student saved = studentRepository.save(found);
         auditService.record("Student", saved.getId(), AuditService.UPDATE, before, saved);
@@ -78,7 +80,10 @@ public class StudentServiceImpl implements StudentService {
     }
 
     private void checkSharedRules(Student theStudent) {
-        if (!theStudent.getEmail().toLowerCase().endsWith("@auca.ac.rw")) {
+        // The register carries no email, so a student may have none. The rule
+        // applies to an address that was actually given.
+        if (hasText(theStudent.getEmail())
+                && !theStudent.getEmail().toLowerCase().endsWith("@auca.ac.rw")) {
             throw new BusinessRuleException("Email must be an AUCA email ending with @auca.ac.rw");
         }
         if (theStudent.getFirstName().equalsIgnoreCase(theStudent.getLastName())) {
@@ -123,9 +128,13 @@ public class StudentServiceImpl implements StudentService {
         copy.setEmail(current.getEmail());
         copy.setPhone(current.getPhone());
         copy.setGender(current.getGender());
-        copy.setProgram(current.getProgram());
-        copy.setYearOfStudy(current.getYearOfStudy());
+        copy.setThematicArea(current.getThematicArea());
+        copy.setStudentGroup(current.getStudentGroup());
         copy.setActive(current.isActive());
         return copy;
+    }
+
+    private boolean hasText(String value) {
+        return value != null && !value.isBlank();
     }
 }

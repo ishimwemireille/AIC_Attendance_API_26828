@@ -114,6 +114,18 @@ Import `postman_collection.json` from the root of this repository. It contains e
 endpoint and a folder of requests that deliberately break each business rule so the
 error responses can be demonstrated.
 
+## The programme
+
+The cohort moves through the courses one after another: DevOps, Web Technology,
+Internet UI and UX, Mobile Programming, Artificial Intelligence, Internet of
+Things. A `Course` carries its position in the programme, the dates it runs and
+the trainer who leads it; a `Session` belongs to a course and must fall inside
+its dates. Two courses may not overlap, because the cohort can only be in one
+at a time.
+
+Every active student is expected at every session of every course, so there is
+no enrolment table: the roster is simply the active students.
+
 ## Running the whole system
 
 Three pieces: PostgreSQL (installed locally), MongoDB and RabbitMQ (containers),
@@ -207,3 +219,47 @@ that PostgreSQL accepts.
 request. Two jobs: the API with its full test suite against a real PostgreSQL
 service container, and the front end build. A badge for the result sits at the
 top of this file once the first run completes.
+
+## Importing the attendance register
+
+The centre already keeps its register in Excel, so the system reads that file
+rather than asking anyone to retype it. **Courses → Import register** on the
+course the register belongs to; **Template** downloads an empty one.
+
+The file is not a list of students, it is the register itself:
+
+```
+NAME | STUDENT ID | GENDER | SECTOR | Aug 16 | Aug 18 | ...
+```
+
+Each sheet is a teaching group, and every column after the fourth is a date on
+which attendance was taken. One upload therefore brings in the roster, a
+session for each date, and the attendance. Column headers that are not a date
+(Excel's own `Column 6` filler) are reported as ignored rather than guessed at,
+and both spellings of *Excuse* and *Excused* are accepted because the two
+sheets disagree.
+
+Imported attendance is taken as given. It was recorded on paper under the
+centre's own practice, so the marking rules this system applies — a time in for
+anyone present, a written reason for an absence — are not imposed on history
+that predates it, and nothing is notified: those absences happened weeks ago.
+
+Email and phone are optional, because the register carries neither. A student
+without them simply receives no alert, and the notification log records that
+the channel was skipped rather than pretending it was sent.
+
+The fourth column is headed `SECTOR` in the centre's file but holds the
+**thematic area** the student works in — Agriculture, Crime Prevention,
+Education, Fintech or Health — so that is what it is called in the system.
+
+A student has no year of study. The register does not record one and the
+programme does not use one, so rather than store a number nobody set, the
+field is gone.
+
+## A note on the database name
+
+The schema changed when courses were introduced, in a way `ddl-auto=update`
+cannot migrate: sessions gained a non-null course. The application therefore
+points at `aic_attendance`. If you have an older `aicattendance` or
+`aicattendancedb` lying around from before, they are no longer used and can be
+dropped.

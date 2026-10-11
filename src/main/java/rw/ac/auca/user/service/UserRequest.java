@@ -9,6 +9,7 @@ import lombok.Setter;
 import rw.ac.auca.user.domain.RoleName;
 
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * The Class UserRequest. What an administrator sends to grant someone access.
@@ -30,4 +31,10 @@ public class UserRequest {
 
     @NotEmpty(message = "At least one role is required")
     private Set<RoleName> roles;
+
+    /**
+     * Optional, and only meaningful for a trainer: the course they are to
+     * lead. Without it a new trainer signs in to an empty screen.
+     */
+    private UUID courseId;
 }

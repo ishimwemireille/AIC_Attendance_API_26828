@@ -62,17 +62,14 @@ export default function Login({ onSignedIn }) {
                    onChange={(e) => setEmail(e.target.value)} />
           </div>
           <div className="field">
-            <label htmlFor="password">Development password</label>
+            <label htmlFor="password">Password</label>
             <input id="password" type="password" value={password} required
                    onChange={(e) => setPassword(e.target.value)} />
           </div>
           <button className="btn" type="submit" disabled={busy}>
             {busy ? 'Checking…' : 'Sign in'}
           </button>
-          <p className="hint">
-            The password box exists only while the API runs with the <code>dev</code> profile, because
-            Google cannot redirect back to a laptop. No per-user password is stored by the system.
-          </p>
+
         </form>
       </div>
     </div>

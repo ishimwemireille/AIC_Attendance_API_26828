@@ -2,10 +2,9 @@ package rw.ac.auca.student.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -23,10 +22,12 @@ import rw.ac.auca.base.BaseEntity;
 @Getter
 @Setter
 @Entity
-@Table(name = "students")
+@Table(name = "students", indexes = {
+        @Index(name = "idx_students_area_group", columnList = "thematic_area, student_group"),
+        @Index(name = "idx_students_active", columnList = "active")
+})
 @Check(constraints = "LENGTH(first_name) >= 2 AND LENGTH(last_name) >= 2 "
-        + "AND gender IN ('Male', 'Female') "
-        + "AND year_of_study BETWEEN 1 AND 5")
+        + "AND gender IN ('Male', 'Female')")
 public class Student extends BaseEntity {
 
     @NotBlank(message = "Registration number is required")
@@ -44,14 +45,18 @@ public class Student extends BaseEntity {
     @Column(name = "last_name", nullable = false, length = 30)
     private String lastName;
 
-    @NotBlank(message = "Email is required")
+    /**
+     * Optional. The attendance register the centre keeps carries no contact
+     * details, so a student may have none. Still unique when present, and a
+     * student without one simply receives no email alert.
+     */
     @Email(message = "Email must be a valid address")
-    @Column(name = "email", nullable = false, unique = true, length = 60)
+    @Column(name = "email", unique = true, length = 60)
     private String email;
 
-    @NotBlank(message = "Phone is required")
-    @Pattern(regexp = "07[0-9]{8}", message = "Phone must be 10 digits starting with 07")
-    @Column(name = "phone", nullable = false, length = 10)
+    /** Optional, for the same reason as the email. */
+    @Pattern(regexp = "07[0-9]{8}|", message = "Phone must be 10 digits starting with 07")
+    @Column(name = "phone", length = 10)
     private String phone;
 
     @NotBlank(message = "Gender is required")
@@ -59,15 +64,24 @@ public class Student extends BaseEntity {
     @Column(name = "gender", nullable = false, length = 6)
     private String gender;
 
-    @NotBlank(message = "Program is required")
-    @Size(min = 2, max = 40, message = "Program must be between 2 and 40 characters")
-    @Column(name = "program", nullable = false, length = 40)
-    private String program;
+    @NotBlank(message = "Thematic area is required")
+    @Size(min = 2, max = 40, message = "Thematic area must be between 2 and 40 characters")
+    /**
+     * The thematic area the student works in: Agriculture, Crime Prevention,
+     * Education, Fintech or Health. The register spells the column SECTOR.
+     */
+    @Column(name = "thematic_area", nullable = false, length = 40)
+    private String thematicArea;
 
-    @Min(value = 1, message = "Year of study must be at least 1")
-    @Max(value = 5, message = "Year of study cannot be more than 5")
-    @Column(name = "year_of_study", nullable = false)
-    private int yearOfStudy;
+    /**
+     * Which of the teaching groups the student sits in. They all take the same
+     * course at the same time; the split is only for room size, so this is a
+     * label rather than a relationship.
+     */
+    @Size(max = 20, message = "Group cannot be longer than 20 characters")
+    @Column(name = "student_group", length = 20)
+    private String studentGroup;
+
 
     @Column(name = "active", nullable = false)
     private boolean active = Boolean.TRUE;

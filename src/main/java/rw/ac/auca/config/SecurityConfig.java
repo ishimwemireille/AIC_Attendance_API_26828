@@ -2,6 +2,7 @@ package rw.ac.auca.config;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -46,6 +47,15 @@ public class SecurityConfig {
     @Autowired
     private ObjectProvider<ClientRegistrationRepository> clientRegistrations;
 
+    /**
+     * Where to send the browser once Google has vouched for the user. Google
+     * redirects to this application's own port, which in development is not
+     * where the React app is being served from, so the two are told apart by a
+     * property. In production the front end is served from here and "/" is right.
+     */
+    @Value("${app.frontend-url:/}")
+    private String frontendUrl;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -60,7 +70,8 @@ public class SecurityConfig {
         // application still starts on a machine where the credentials are not set.
         if (clientRegistrations.getIfAvailable() != null) {
             http.oauth2Login(login -> login
-                    .userInfoEndpoint(userInfo -> userInfo.oidcUserService(oidcUserService)));
+                    .userInfoEndpoint(userInfo -> userInfo.oidcUserService(oidcUserService))
+                    .defaultSuccessUrl(frontendUrl, true));
         }
 
         // Development convenience only. See DevUserDetailsService.
